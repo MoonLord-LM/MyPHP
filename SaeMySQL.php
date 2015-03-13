@@ -86,7 +86,7 @@ function SaeMySQLSelectAllArray($SQL){
 	$row = mysql_fetch_array($result);
 	while ($row){
 		$data[] = $row;
-		$data = mysql_fetch_array($result);
+		$row = mysql_fetch_array($result);
 	}
 	return $data;
 }
@@ -100,7 +100,7 @@ function SaeMySQLSelectDefaultArray($SQL){
 	$row = mysql_fetch_row($result);
 	while ($row){
 		$data[] = $row;
-		$data = mysql_fetch_row($result);
+		$row = mysql_fetch_row($result);
 	}
 	return $data;
 }
@@ -114,7 +114,7 @@ function SaeMySQLSelectAssociativeArray($SQL){
 	$row = mysql_fetch_assoc($result);
 	while ($row){
 		$data[] = $row;
-		$data = mysql_fetch_assoc($result);
+		$row = mysql_fetch_assoc($result);
 	}
 	return $data;
 }
@@ -122,5 +122,45 @@ function SaeMySQLSelectAssociativeArray($SQL){
 function SaeMySQLDisconnect(){
 	mysql_close();
 }
-
+//SQL结果集解析的函数（成功返回数据的关联和默认下标数组，失败返回false）
+function SaeMySQLFetchAllArray($result){
+	$data  = array();
+	if($result===false){return $data;}
+	$row = mysql_fetch_array($result);
+	while ($row){
+		$data[] = $row;
+		$row = mysql_fetch_array($result);
+	}
+	return $data;
+}
+//SQL结果集解析的函数（成功只返回数据的默认下标数组，失败返回false）
+function SaeMySQLFetchDefaultArray($result){
+	$data  = array();
+	if($result===false){return $data;}
+	$row = mysql_fetch_row($result);
+	while ($row){
+		$data[] = $row;
+		$row = mysql_fetch_row($result);
+	}
+	return $data;
+}
+//SQL结果集解析的函数（成功只返回数据的关联数组，失败返回false）
+function SaeMySQLFetchAssociativeArray($result){
+	$data  = array();
+	if($result===false){return $data;}
+	$row = mysql_fetch_assoc($result);
+	while ($row){
+		$data[] = $row;
+		$row = mysql_fetch_assoc($result);
+	}
+	return $data;
+}
+//获取MySQL版本号的函数
+function SaeMySQLVersion(){
+	return mysql_get_server_info();
+}
+//获取MySQL当前运行的线程信息的函数
+function SaeMySQLProcesses(){
+	return SaeMySQLFetchAssociativeArray(mysql_list_processes());
+}
 ?>
