@@ -7,8 +7,10 @@ function SaeStorageWrite($FilePath,$FileContent){
     $storage = new SaeStorage();
     $domain = Sae_Storage_Domain_Name;
     $size = -1;//长度限制
-	$attr = array('encoding'=>'gzip');//文件属性（gzip压缩）
-	$compress = true;//文件是否gzip压缩
+	//$attr = array('encoding'=>'gzip');//文件属性（gzip压缩）
+	//$compress = true;//文件是否gzip压缩
+	$attr = array();
+	$compress = false;
     $result = $storage->write($domain,$FilePath,$FileContent,$size,$attr,$compress);
     return $result;
 }
@@ -18,8 +20,10 @@ function SaeStorageUpload($FilePath,$srcFileName){
 	$domain = Sae_Storage_Domain_Name;//domain名称
 	//$srcFileName = $_FILE['tmp_name'];//参数类似这样
 	$size = -1;//长度限制
-	$attr = array('encoding'=>'gzip');//文件属性（gzip压缩）
-	$compress = true;//文件是否gzip压缩
+	//$attr = array('encoding'=>'gzip');//文件属性（gzip压缩）
+	//$compress = true;//文件是否gzip压缩
+	$attr = array();
+	$compress = false;
 	$result = $storage->upload($domain,$FilePath,$srcFileName,$size,$attr,$compress);
 	return $result;
 }
@@ -27,8 +31,23 @@ function SaeStorageUpload($FilePath,$srcFileName){
 function SaeStorageRead($FilePath){
     $storage = new SaeStorage();
     $domain = Sae_Storage_Domain_Name;
-    $result = $storage->read($domain,$FilePath);
+	$result = $storage->read($domain,$FilePath);
     return $result;
+}
+//自定义的文件末尾追加内容函数（参数为文件保存的相对路径和要追加的文件内容，成功返回文件下载路径，读取失败或写入失败返回false）
+function SaeStorageAppend($FilePath,$AppendContent){
+	$storage = new SaeStorage();
+	$domain = Sae_Storage_Domain_Name;
+	$result = $storage->read($domain,$FilePath);
+	if($result===false){return false;}
+	$FileContent = $result . $AppendContent;
+	$size = -1;//长度限制
+	//$attr = array('encoding'=>'gzip');//文件属性（gzip压缩）
+	//$compress = true;//文件是否gzip压缩
+	$attr = array();
+	$compress = false;
+	$result = $storage->write($domain,$FilePath,$FileContent,$size,$attr,$compress);
+	return $result;
 }
 //自定义的文件删除函数（参数为文件保存的相对路径，成功返回true，失败返回false）
 function SaeStorageDelete($FilePath){

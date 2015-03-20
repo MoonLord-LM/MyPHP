@@ -190,7 +190,7 @@ function MyException($type, $description)
 		default:
 	}
 	$result = array("result"=>"exception","type"=>$type,"description"=>$description);
-	$result = MyJson_decode($result);
+	$result = MyJson_encode($result);
 	die($result);
 }
 //预定义的错误$type：
@@ -950,20 +950,22 @@ function MyUrlBase64_encode($data) {
 function MyUrlBase64_decode($data) {
 	return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT)); 
 }
-//对数组进行URL编码（递归调用，用于MyJson_decode函数调用）
+//对数组进行URL编码并处理换行（递归调用，用于MyJson_decode函数调用）
 function ArrayUrl_encode($data) {
 	if(is_array($data)){
 		foreach($data as $key=>$value) {
-			$data[urlencode($key)] = ArrayUrl_encode($value);
+			$data[ArrayUrl_encode($key)] = ArrayUrl_encode($value);
 		}
 	}
 	else {
+		$data = str_replace("\r",'\r',$data);
+		$data = str_replace("\n",'\n',$data);
 		$data = urlencode($data);
 	}
 	return $data;
 }
 //保留中文的JSON转换字符串函数
-function MyJson_decode($data) { 
+function MyJson_encode($data){
 	//var_dump(ArrayUrl_encode($data));
 	//var_dump(json_encode(ArrayUrl_encode($data)));
 	//var_dump(urldecode(json_encode(ArrayUrl_encode($data))));

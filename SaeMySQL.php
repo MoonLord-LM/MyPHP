@@ -77,7 +77,7 @@ function SaeMySQLInsert($SQL){
 	return mysql_insert_id();
 }
 //自定义的MySQL读取数据库的函数（成功返回数据的关联和默认下标数组，失败返回false）
-function SaeMySQLSelectAllArray($SQL){
+function SaeMySQLSelectArray($SQL){
 	$result = mysql_query($SQL);
 	if(!$result){
 		return false;
@@ -117,6 +117,36 @@ function SaeMySQLSelectAssociativeArray($SQL){
 		$row = mysql_fetch_assoc($result);
 	}
 	return $data;
+}
+//自定义的MySQL读取数据库（一行）的函数（成功返回数据的关联和默认下标数组，失败或【查询到的行数为0】返回false）
+function SaeMySQLSelectRow($SQL){
+	$result = mysql_query($SQL);
+	if(!$result){
+		return false;
+	}
+	$row = mysql_fetch_array($result);
+	if (!$row){ return false; }
+	return $row;
+}
+//自定义的MySQL读取数据库（一行）的函数（成功只返回数据的默认下标数组，失败或【查询到的行数为0】返回false）
+function SaeMySQLSelectDefaultRow($SQL){
+	$result = mysql_query($SQL);
+	if(!$result){
+		return false;
+	}
+	$row = mysql_fetch_row($result);
+	if (!$row){ return false; }
+	return $row;
+}
+//自定义的MySQL读取数据库（一行）的函数（成功只返回数据的关联数组，失败或【查询到的行数为0】返回false）
+function SaeMySQLSelectAssociativeRow($SQL){
+	$result = mysql_query($SQL);
+	if(!$result){
+		return false;
+	}
+	$row = mysql_fetch_assoc($result);
+	if (!$row){ return false; }
+	return $row;
 }
 //自定义的MySQL断开连接的函数（成功返回true，失败返回false）
 function SaeMySQLDisconnect(){
@@ -163,4 +193,12 @@ function SaeMySQLVersion(){
 function SaeMySQLProcesses(){
 	return SaeMySQLFetchAssociativeArray(mysql_list_processes());
 }
+//示例使用代码：
+/*
+SaeMySQLConnect();
+var_dump(json_encode(SaeMySQLSelectAssociativeRow('SELECT * FROM  `DDOS_Student_Class` LIMIT 0 , 1')));
+var_dump(json_encode(array("1"=>"\r\n")));
+var_dump(SaeMySQLProcesses());
+var_dump(SaeMySQLVersion());
+*/
 ?>
