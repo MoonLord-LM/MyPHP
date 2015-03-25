@@ -6,6 +6,10 @@ $MySQL_Username = SAE_MYSQL_USER;
 $MySQL_Password = SAE_MYSQL_PASS;
 $MySQL_Database = SAE_MYSQL_DB;
 
+//已处理的MySQL错误：
+//2006 MySQL server has gone away（可能原因：MySQL服务已异常关闭、连接超时、SQL语句过长、获取的结果集过长等，解决方案：尝试一次重新连接和重新查询）
+//2013 Lost connection to MySQL server during query（可能原因：MySQL连接超时、SQL语句过长、获取的结果集过长等，解决方案：尝试一次重新连接和重新查询）
+
 //die("【数据库连接错误】<br/>错误代码：".mysql_errno()."<br/>错误原因: ".mysql_error());
 
 //自定义的MySQL新建连接的函数（成功返回数据库连接标识，失败返回false）
@@ -24,13 +28,22 @@ function SaeMySQLConnect(){
 	}
 	return $Connect;
 }
-//自定义的MySQL尝试更新数据库的函数（成功或【实际影响的行数为0】返回true，失败返回false）
+//自定义的MySQL尝试更新/删除数据库的函数（成功或【实际影响的行数为0】返回true，失败返回false）
 function SaeMySQLTryUpdate($SQL){
 	$result = mysql_query($SQL);
+	//2006和2013错误则重试一次
+	if(!$result && in_array(mysql_errno(), array(2006, 2013))){
+		SaeMySQLDisconnect();
+		SaeMySQLConnect();
+		$result = mysql_query($SQL);
+	}
 	if(!$result){
 		return false;
 	}
 	return $result;
+}
+function SaeMySQLTryDelete($SQL){
+	return SaeMySQLTryUpdate($SQL);
 }
 //自定义的MySQL强制更新数据库的函数（成功返回true，失败或【实际影响的行数为0】返回false）
 function SaeMySQLMustUpdate($SQL){
@@ -38,6 +51,12 @@ function SaeMySQLMustUpdate($SQL){
 	//mysql_query(query,connection)的参数connection如果未规定，则使用上一个打开的连接
 	//mysql_query返回非false的值，不说明任何有关影响到的或返回的行数，很有可能一条查询执行成功了但并未影响到或并未返回任何行
 	$result = mysql_query($SQL);
+	//2006和2013错误则重试一次
+	if(!$result && in_array(mysql_errno(), array(2006, 2013))){
+		SaeMySQLDisconnect();
+		SaeMySQLConnect();
+		$result = mysql_query($SQL);
+	}
 	if(!$result){
 		return false;
 	}
@@ -46,28 +65,18 @@ function SaeMySQLMustUpdate($SQL){
 	}
 	return $result;
 }
-//自定义的MySQL尝试删除数据库的函数（等同于SaeMySQLTryUpdate，成功或【实际影响的行数为0】返回true，失败返回false）
-function SaeMySQLTryDelete($SQL){
-	$result = mysql_query($SQL);
-	if(!$result){
-		return false;
-	}
-	return $result;
-}
-//自定义的MySQL强制删除数据库的函数（等同于SaeMySQLMustUpdate，成功返回true，失败或【实际影响的行数为0】返回false）
 function SaeMySQLMustDelete($SQL){
-	$result = mysql_query($SQL);
-	if(!$result){
-		return false;
-	}
-	if(mysql_affected_rows()===0){
-		return false;
-	}
-	return $result;
+	return SaeMySQLMustUpdate($SQL);
 }
 //自定义的MySQL插入数据库的函数（成功返回上一步INSERT操作产生的ID，失败返回false）
 function SaeMySQLInsert($SQL){
 	$result = mysql_query($SQL);
+	//2006和2013错误则重试一次
+	if(!$result && in_array(mysql_errno(), array(2006, 2013))){
+		SaeMySQLDisconnect();
+		SaeMySQLConnect();
+		$result = mysql_query($SQL);
+	}
 	if(!$result){
 		return false;
 	}
@@ -79,6 +88,12 @@ function SaeMySQLInsert($SQL){
 //自定义的MySQL读取数据库的函数（成功返回数据的关联和默认下标数组，失败返回false）
 function SaeMySQLSelectArray($SQL){
 	$result = mysql_query($SQL);
+	//2006和2013错误则重试一次
+	if(!$result && in_array(mysql_errno(), array(2006, 2013))){
+		SaeMySQLDisconnect();
+		SaeMySQLConnect();
+		$result = mysql_query($SQL);
+	}
 	if(!$result){
 		return false;
 	}
@@ -93,6 +108,12 @@ function SaeMySQLSelectArray($SQL){
 //自定义的MySQL读取数据库的函数（成功只返回数据的默认下标数组，失败返回false）
 function SaeMySQLSelectDefaultArray($SQL){
 	$result = mysql_query($SQL);
+	//2006和2013错误则重试一次
+	if(!$result && in_array(mysql_errno(), array(2006, 2013))){
+		SaeMySQLDisconnect();
+		SaeMySQLConnect();
+		$result = mysql_query($SQL);
+	}
 	if(!$result){
 		return false;
 	}
@@ -107,6 +128,12 @@ function SaeMySQLSelectDefaultArray($SQL){
 //自定义的MySQL读取数据库的函数（成功只返回数据的关联数组，失败返回false）
 function SaeMySQLSelectAssociativeArray($SQL){
 	$result = mysql_query($SQL);
+	//2006和2013错误则重试一次
+	if(!$result && in_array(mysql_errno(), array(2006, 2013))){
+		SaeMySQLDisconnect();
+		SaeMySQLConnect();
+		$result = mysql_query($SQL);
+	}
 	if(!$result){
 		return false;
 	}
@@ -121,6 +148,12 @@ function SaeMySQLSelectAssociativeArray($SQL){
 //自定义的MySQL读取数据库（一行）的函数（成功返回数据的关联和默认下标数组，失败或【查询到的行数为0】返回false）
 function SaeMySQLSelectRow($SQL){
 	$result = mysql_query($SQL);
+	//2006和2013错误则重试一次
+	if(!$result && in_array(mysql_errno(), array(2006, 2013))){
+		SaeMySQLDisconnect();
+		SaeMySQLConnect();
+		$result = mysql_query($SQL);
+	}
 	if(!$result){
 		return false;
 	}
@@ -131,6 +164,12 @@ function SaeMySQLSelectRow($SQL){
 //自定义的MySQL读取数据库（一行）的函数（成功只返回数据的默认下标数组，失败或【查询到的行数为0】返回false）
 function SaeMySQLSelectDefaultRow($SQL){
 	$result = mysql_query($SQL);
+	//2006和2013错误则重试一次
+	if(!$result && in_array(mysql_errno(), array(2006, 2013))){
+		SaeMySQLDisconnect();
+		SaeMySQLConnect();
+		$result = mysql_query($SQL);
+	}
 	if(!$result){
 		return false;
 	}
@@ -141,6 +180,12 @@ function SaeMySQLSelectDefaultRow($SQL){
 //自定义的MySQL读取数据库（一行）的函数（成功只返回数据的关联数组，失败或【查询到的行数为0】返回false）
 function SaeMySQLSelectAssociativeRow($SQL){
 	$result = mysql_query($SQL);
+	//2006和2013错误则重试一次
+	if(!$result && in_array(mysql_errno(), array(2006, 2013))){
+		SaeMySQLDisconnect();
+		SaeMySQLConnect();
+		$result = mysql_query($SQL);
+	}
 	if(!$result){
 		return false;
 	}
