@@ -9,6 +9,9 @@ $MySQL_Database = SAE_MYSQL_DB;
 //已处理的MySQL错误：
 //2006 MySQL server has gone away（可能原因：MySQL服务已异常关闭、连接超时、SQL语句过长、获取的结果集过长等，解决方案：尝试一次重新连接和重新查询）
 //2013 Lost connection to MySQL server during query（可能原因：MySQL连接超时、SQL语句过长、获取的结果集过长等，解决方案：尝试一次重新连接和重新查询）
+//结果集的额外处理：
+//单元格的值如果为NULL，在返回结果中，将被转换为空字符串""
+//单元格的值如果为JSON字符串，在返回结果中，将被转换为JSON数组
 
 //die("【数据库连接错误】<br/>错误代码：".mysql_errno()."<br/>错误原因: ".mysql_error());
 
@@ -100,6 +103,7 @@ function SaeMySQLSelectArray($SQL){
 	$data  = array();
 	$row = mysql_fetch_array($result);
 	while ($row){
+		ResultTransform($row);
 		$data[] = $row;
 		$row = mysql_fetch_array($result);
 	}
@@ -120,6 +124,7 @@ function SaeMySQLSelectDefaultArray($SQL){
 	$data  = array();
 	$row = mysql_fetch_row($result);
 	while ($row){
+		ResultTransform($row);
 		$data[] = $row;
 		$row = mysql_fetch_row($result);
 	}
@@ -140,6 +145,7 @@ function SaeMySQLSelectAssociativeArray($SQL){
 	$data  = array();
 	$row = mysql_fetch_assoc($result);
 	while ($row){
+		ResultTransform($row);
 		$data[] = $row;
 		$row = mysql_fetch_assoc($result);
 	}
@@ -159,6 +165,7 @@ function SaeMySQLSelectRow($SQL){
 	}
 	$row = mysql_fetch_array($result);
 	if (!$row){ return false; }
+	ResultTransform($row);
 	return $row;
 }
 //自定义的MySQL读取数据库（一行）的函数（成功只返回数据的默认下标数组，失败或【查询到的行数为0】返回false）
@@ -175,6 +182,7 @@ function SaeMySQLSelectDefaultRow($SQL){
 	}
 	$row = mysql_fetch_row($result);
 	if (!$row){ return false; }
+	ResultTransform($row);
 	return $row;
 }
 //自定义的MySQL读取数据库（一行）的函数（成功只返回数据的关联数组，失败或【查询到的行数为0】返回false）
@@ -191,7 +199,32 @@ function SaeMySQLSelectAssociativeRow($SQL){
 	}
 	$row = mysql_fetch_assoc($result);
 	if (!$row){ return false; }
+	ResultTransform($row);
 	return $row;
+}
+//自定义的MySQL读取数据库（一格）的函数（成功返回数据，失败或【查询到的行数为0】返回false）
+function SaeMySQLSelectCell($SQL){
+	$result = mysql_query($SQL);
+	//2006和2013错误则重试一次
+	if(!$result && in_array(mysql_errno(), array(2006, 2013))){
+		SaeMySQLDisconnect();
+		SaeMySQLConnect();
+		$result = mysql_query($SQL);
+	}
+	if(!$result){
+		return false;
+	}
+	$row = mysql_fetch_row($result);	
+	if (!$row){ return false; }
+	ResultTransform($row);
+	$row = $row[0];
+	return $row;
+}
+function SaeMySQLSelectDefaultCell($SQL){
+	return SaeMySQLSelectCell($SQL);
+}
+function SaeMySQLSelectAssociativeCell($SQL){
+	return SaeMySQLSelectCell($SQL);
 }
 //自定义的MySQL断开连接的函数（成功返回true，失败返回false）
 function SaeMySQLDisconnect(){
@@ -203,6 +236,7 @@ function SaeMySQLFetchAllArray($result){
 	if($result===false){return $data;}
 	$row = mysql_fetch_array($result);
 	while ($row){
+		ResultTransform($row);
 		$data[] = $row;
 		$row = mysql_fetch_array($result);
 	}
@@ -214,6 +248,7 @@ function SaeMySQLFetchDefaultArray($result){
 	if($result===false){return $data;}
 	$row = mysql_fetch_row($result);
 	while ($row){
+		ResultTransform($row);
 		$data[] = $row;
 		$row = mysql_fetch_row($result);
 	}
@@ -225,6 +260,7 @@ function SaeMySQLFetchAssociativeArray($result){
 	if($result===false){return $data;}
 	$row = mysql_fetch_assoc($result);
 	while ($row){
+		ResultTransform($row);
 		$data[] = $row;
 		$row = mysql_fetch_assoc($result);
 	}
@@ -237,6 +273,16 @@ function SaeMySQLVersion(){
 //获取MySQL当前运行的线程信息的函数
 function SaeMySQLProcesses(){
 	return SaeMySQLFetchAssociativeArray(mysql_list_processes());
+}
+//自定义的结果集处理函数，将NULL值和JSON字符串做转换
+function ResultTransform(&$Array){
+	foreach ($Array as &$Item){
+		$Item = ($Item!==null) ? $Item : '';
+		$temp = json_decode($Item,true);
+		//PHP语言，数组变量的=号赋值，是进行的值的Copy，而不是指针的Copy
+		$Item = ($temp===null) ? $Item : $temp;
+	}
+	//因为有这个函数的存在，所以SaeMySQLSelectCell可能返回的是一个数组
 }
 //示例使用代码：
 /*
