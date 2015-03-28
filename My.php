@@ -1,252 +1,146 @@
 <?php
-//MyPHP开源库
-//更新时间：2015.3.12，作者：MoonLord
+//MyPHP 后台API开发的开源函数库
+//作者：MoonLord
 
 //基本设置：
+error_reporting(E_ALL);//显示所有警告和提示
 //error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);//抑制警告和提示
 date_default_timezone_set('PRC');//中国时区
 mb_internal_encoding("UTF-8");//UTF-8编码
 ignore_user_abort(true);//完整执行
 
-//成功结束（正常的返回结果）
-function MySuccess($data, $description)
-{
-	SuccessReport($data, $description);
-	$result = array("result"=>"success","data"=>$data,"description"=>$description);
-	$result = MyJson_decode($result);
-	die($result);
-}
-//预定义的异常$type：
-define('Exception_Parameter_Missing' , '参数丢失');
-define('Exception_Parameter_Empty' , '参数为空值');
-define('Exception_Parameter_NotNumeric' , '参数不是数值');
-define('Exception_Parameter_NotBoolean' , '参数不是布尔值');
-define('Exception_Parameter_NotTinyInt' , '参数不是0或1');
-define('Exception_Parameter_NotInteger' , '参数不是整数');
-define('Exception_Parameter_NotDigit' , '参数不是数字');
-define('Exception_Parameter_NotLongDigit' , '参数不是指定长度的数字');
-define('Exception_Parameter_NotAlphaNumeric' , '参数不是数字或字母');
-define('Exception_Parameter_NotFixedAlphaNumeric' , '参数不是指定长度的数字或字母');
-define('Exception_Parameter_NotTime' , '参数不是时间');
-define('Exception_Parameter_NotFixedTime' , '参数不是指定范围的时间');
-define('Exception_Parameter_NotDigitJsonArray' , '参数不是数字组成的JSON数组');
-define('Exception_Parameter_NotLong' , '参数不是指定字节长度的字符串');
-define('Exception_Parameter_NotLongCharacter' , '参数不是指定字符个数的字符串');
-define('Exception_Parameter_NotLongEnglish' , '参数不是指定字符个数的英文字符串');
-define('Exception_Parameter_NotLongChinese' , '参数不是指定字符个数的中文字符串');
-define('Exception_Parameter_NotFixedLong' , '参数不是指定字节长度的字符串');
-define('Exception_Parameter_NotFixedLongCharacter' , '参数不是指定字符个数的字符串');
-define('Exception_Parameter_NotFixedLongEnglish' , '参数不是指定字符个数的英文字符串');
-define('Exception_Parameter_NotFixedLongChinese' , '参数不是指定字符个数的中文字符串');
-define('Exception_OptionalParameter_Empty' , '可选参数为空值');
-define('Exception_OptionalParameter_NotNumeric' , '可选参数不是数值');
-define('Exception_OptionalParameter_NotBoolean' , '可选参数不是布尔值');
-define('Exception_OptionalParameter_NotTinyInt' , '可选参数不是0或1');
-define('Exception_OptionalParameter_NotInteger' , '可选参数不是整数');
-define('Exception_OptionalParameter_NotDigit' , '可选参数不是数字');
-define('Exception_OptionalParameter_NotLongDigit' , '可选参数不是指定长度的数字');
-define('Exception_OptionalParameter_NotAlphaNumeric' , '可选参数不是数字或字母');
-define('Exception_OptionalParameter_NotFixedAlphaNumeric' , '可选参数不是指定长度的数字或字母');
-define('Exception_OptionalParameter_NotTime' , '可选参数不是时间');
-define('Exception_OptionalParameter_NotFixedTime' , '可选参数不是指定范围的时间');
-define('Exception_OptionalParameter_NotDigitJsonArray' , '可选参数不是数字组成的JSON数组');
-define('Exception_OptionalParameter_NotLong' , '可选参数不是指定字节长度的字符串');
-define('Exception_OptionalParameter_NotLongCharacter' , '可选参数不是指定字符个数的字符串');
-define('Exception_OptionalParameter_NotLongEnglish' , '可选参数不是指定字符个数的英文字符串');
-define('Exception_OptionalParameter_NotLongChinese' , '可选参数不是指定字符个数的中文字符串');
-define('Exception_OptionalParameter_NotFixedLong' , '可选参数不是指定字节长度的字符串');
-define('Exception_OptionalParameter_NotFixedLongCharacter' , '可选参数不是指定字符个数的字符串');
-define('Exception_OptionalParameter_NotFixedLongEnglish' , '可选参数不是指定字符个数的英文字符串');
-define('Exception_OptionalParameter_NotFixedLongChinese' , '可选参数不是指定字符个数的中文字符串');
-//异常终止（需要请求方处理）
-function MyException($type, $description)
-{
-	ExceptionReport($type, $description);
-	switch ($type)
-	{
-		case Exception_Parameter_Missing:
-			$description = 'Http参数【' . $description . '】的值必须设置，此次请求未设置这个参数';
-			break;
-		case Exception_Parameter_Empty:
-			$description = 'Http参数【' . $description . '】的值必须设置为非零非空的值，此次请求这个参数的值为0，或者为空字符串';
-			break;
-		case Exception_Parameter_NotNumeric:
-			$description = 'Http参数【' . $description . '】的值必须设置为数值，此次请求这个参数的值不是数值';
-			break;
-		case Exception_Parameter_NotBoolean:
-			$description = 'Http参数【' . $description . '】的值必须设置为true或false，此次请求这个参数的值不是true或false';
-			break;
-		case Exception_Parameter_NotTinyInt:
-			$description = 'Http参数【' . $description . '】的值必须设置为0或1，此次请求这个参数的值不是0或1';
-			break;
-		case Exception_Parameter_NotInteger:
-			$description = 'Http参数【' . $description . '】的值必须设置为-2147483648到2147483647的整数，此次请求这个参数的值不是-2147483648到2147483647的整数';
-			break;
-		case Exception_Parameter_NotDigit:
-			$description = 'Http参数【' . $description . '】的值必须设置为数字0-9构成的非空字符串，此次请求这个参数的值不是数字0-9构成的非空字符串';
-			break;
-		case Exception_Parameter_NotLongDigit:
-			$description = 'Http参数【' . $description[0] . '】的值必须设置为数字0-9构成的' . $description[1] . '位字符串，此次请求这个参数的值不是数字0-9构成的' . $description[1] . '位字符串';
-			break;
-		case Exception_Parameter_NotAlphaNumeric:
-			$description = 'Http参数【' . $description . '】的值必须设置为字母和数字构成的非空字符串，此次请求这个参数的值不是字母和数字构成的非空字符串';
-			break;
-		case Exception_Parameter_NotFixedAlphaNumeric:
-			$description = 'Http参数【' . $description[0] . '】的值必须设置为字母和数字构成的不少于' . $description[1] . '位，不多于' . $description[2] . '位的非空字符串，此次请求这个参数的值不是字母和数字构成的不少于' . $description[1] . '位，不多于' . $description[2] . '位的非空字符串';
-			break;
-		case Exception_Parameter_NotTime:
-			$description = 'Http参数【' . $description . '】的值必须设置为标准时间字符串，此次请求这个参数的值不是标准时间字符串';
-			break;
-		case Exception_Parameter_NotFixedTime:
-			$description = 'Http参数【' . $description[0] . '】的值必须设置为不早于' . $description[1] . '，不晚于' . $description[2] . '的标准时间字符串，此次请求这个参数的值不是不早于' . $description[1] . '，不晚于' . $description[2] . '的标准时间字符串';
-			break;
-		case Exception_Parameter_NotDigitJsonArray:
-			$description = 'Http参数【' . $description . '】的值必须设置为数字0-9构成的非空字符串的JSON数组，此次请求这个参数的值不是数字0-9构成的非空字符串的JSON数组';
-			break;
-		case Exception_Parameter_NotLong:
-			$description = 'Http参数【' . $description[0] . '】的值必须设置为字节个数为' . $description[1] . '的字符串，此次请求这个参数的值不是字节个数为' . $description[1] . '的字符串';
-			break;
-		case Exception_Parameter_NotLongCharacter:
-			$description = 'Http参数【' . $description[0] . '】的值必须设置为中英文字符个数为' . $description[1] . '的字符串，此次请求这个参数的值不是中英文字符个数为' . $description[1] . '的字符串';
-			break;
-		case Exception_Parameter_NotLongEnglish:
-			$description = 'Http参数【' . $description[0] . '】的值必须设置为纯英文字符个数为' . $description[1] . '的字符串，此次请求这个参数的值不是纯英文字符个数为' . $description[1] . '的字符串';
-			break;
-		case Exception_Parameter_NotLongChinese:
-			$description = 'Http参数【' . $description[0] . '】的值必须设置为纯中文字符个数为' . $description[1] . '的字符串，此次请求这个参数的值不是纯中文字符个数为' . $description[1] . '的字符串';
-			break;
-		case Exception_Parameter_NotFixedLong:
-			$description = 'Http参数【' . $description[0] . '】的值必须设置为字节个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的字符串，此次请求这个参数的值不是字节个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的字符串';
-			break;
-		case Exception_Parameter_NotFixedLongCharacter:
-			$description = 'Http参数【' . $description[0] . '】的值必须设置为中英文的字符个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的字符串，此次请求这个参数的值不是中英文字符个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的字符串';
-			break;
-		case Exception_Parameter_NotFixedLongEnglish:
-			$description = 'Http参数【' . $description[0] . '】的值必须设置为字符个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的纯英文的字符串，此次请求这个参数的值不是字符个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的纯英文的字符串';
-			break;
-		case Exception_Parameter_NotFixedLongChinese:
-			$description = 'Http参数【' . $description[0] . '】的值必须设置为字符个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的纯中文的字符串，此次请求这个参数的值不是字符个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的纯中文的字符串';
-			break;
-		case Exception_OptionalParameter_Empty:
-			$description = '可选Http参数【' . $description . '】的值要么不设置，要么必须设置为非零非空的值，此次请求这个参数的值为0，或者为空字符串';
-			break;
-		case Exception_OptionalParameter_NotNumeric:
-			$description = '可选Http参数【' . $description . '】的值要么不设置，要么必须设置为数值，此次请求这个参数的值不是数值';
-			break;
-		case Exception_OptionalParameter_NotBoolean:
-			$description = '可选Http参数【' . $description . '】的值要么不设置，要么必须设置为true或false，此次请求这个参数的值不是true或false';
-			break;
-		case Exception_OptionalParameter_NotTinyInt:
-			$description = '可选Http参数【' . $description . '】的值要么不设置，要么必须设置为0或1，此次请求这个参数的值不是0或1';
-			break;
-		case Exception_OptionalParameter_NotInteger:
-			$description = '可选Http参数【' . $description . '】的值要么不设置，要么必须设置为-2147483648到2147483647的整数，此次请求这个参数的值不是-2147483648到2147483647的整数';
-			break;
-		case Exception_OptionalParameter_NotDigit:
-			$description = '可选Http参数【' . $description . '】的值要么不设置，要么必须设置为数字0-9构成的非空字符串，此次请求这个参数的值不是数字0-9构成的非空字符串';
-			break;
-		case Exception_OptionalParameter_NotLongDigit:
-			$description = '可选Http参数【' . $description[0] . '】的值要么不设置，要么必须设置为数字0-9构成的' . $description[1] . '位字符串，此次请求这个参数的值不是数字0-9构成的' . $description[1] . '位字符串';
-			break;
-		case Exception_OptionalParameter_NotAlphaNumeric:
-			$description = '可选Http参数【' . $description . '】的值要么不设置，要么必须设置为字母和数字构成的非空字符串，此次请求这个参数的值不是字母和数字构成的非空字符串';
-			break;
-		case Exception_OptionalParameter_NotFixedAlphaNumeric:
-			$description = '可选Http参数【' . $description[0] . '】的值要么不设置，要么必须设置为字母和数字构成的不少于' . $description[1] . '位，不多于' . $description[2] . '位的非空字符串，此次请求这个参数的值不是字母和数字构成的不少于' . $description[1] . '位，不多于' . $description[2] . '位的非空字符串';
-			break;
-		case Exception_OptionalParameter_NotTime:
-			$description = '可选Http参数【' . $description . '】的值要么不设置，要么必须设置为标准时间字符串，此次请求这个参数的值不是标准时间字符串';
-			break;
-		case Exception_OptionalParameter_NotFixedTime:
-			$description = '可选Http参数【' . $description[0] . '】的值要么不设置，要么必须设置为不早于' . $description[1] . '，不晚于' . $description[2] . '的标准时间字符串，此次请求这个参数的值不是不早于' . $description[1] . '，不晚于' . $description[2] . '的标准时间字符串';
-			break;
-		case Exception_OptionalParameter_NotDigitJsonArray:
-			$description = '可选Http参数【' . $description . '】的值要么不设置，要么必须设置为数字0-9构成的非空字符串的JSON数组，此次请求这个参数的值不是数字0-9构成的非空字符串的JSON数组';
-			break;
-		case Exception_OptionalParameter_NotLong:
-			$description = '可选Http参数【' . $description[0] . '】的值要么不设置，要么必须设置为字节个数为' . $description[1] . '的字符串，此次请求这个参数的值不是字节个数为' . $description[1] . '的字符串';
-			break;
-		case Exception_OptionalParameter_NotLongCharacter:
-			$description = '可选Http参数【' . $description[0] . '】的值要么不设置，要么必须设置为中英文字符个数为' . $description[1] . '的字符串，此次请求这个参数的值不是中英文字符个数为' . $description[1] . '的字符串';
-			break;
-		case Exception_OptionalParameter_NotLongEnglish:
-			$description = '可选Http参数【' . $description[0] . '】的值要么不设置，要么必须设置为纯英文字符个数为' . $description[1] . '的字符串，此次请求这个参数的值不是纯英文字符个数为' . $description[1] . '的字符串';
-			break;
-		case Exception_OptionalParameter_NotLongChinese:
-			$description = '可选Http参数【' . $description[0] . '】的值要么不设置，要么必须设置为纯中文字符个数为' . $description[1] . '的字符串，此次请求这个参数的值不是纯中文字符个数为' . $description[1] . '的字符串';
-			break;
-		case Exception_OptionalParameter_NotFixedLong:
-			$description = '可选Http参数【' . $description[0] . '】的值要么不设置，要么必须设置为字节个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的字符串，此次请求这个参数的值不是字节个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的字符串';
-			break;
-		case Exception_OptionalParameter_NotFixedLongCharacter:
-			$description = '可选Http参数【' . $description[0] . '】的值要么不设置，要么必须设置为中英文的字符个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的字符串，此次请求这个参数的值不是中英文字符个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的字符串';
-			break;
-		case Exception_OptionalParameter_NotFixedLongEnglish:
-			$description = '可选Http参数【' . $description[0] . '】的值要么不设置，要么必须设置为字符个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的纯英文的字符串，此次请求这个参数的值不是字符个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的纯英文的字符串';
-			break;
-		case Exception_OptionalParameter_NotFixedLongChinese:
-			$description = '可选Http参数【' . $description[0] . '】的值要么不设置，要么必须设置为字符个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的纯中文的字符串，此次请求这个参数的值不是字符个数为不少于' . $description[1] . '个，不多于' . $description[2] . '个的纯中文的字符串';
-			break;
-		default:
+//存取操作Session变量
+function MySessionStart(){
+	//注意：调用这些函数前不能有任何输出
+	//内部已保证其它Session操作在session_start函数之后
+	if(!isset($_SESSION)){
+		session_start();
 	}
-	$result = array("result"=>"exception","type"=>$type,"description"=>$description);
-	$result = MyJson_encode($result);
-	die($result);
 }
-//预定义的错误$type：
-define('Error_PhpFunction_MistakenlyUsed' , 'PHP函数调用错误');
-//错误终止（需要服务器记录）
-function MyError($type, $description)
-{
-	ErrorReport($type, $description);
-	switch ($type)
-	{
-		case Error_PhpFunction_MistakenlyUsed:
-			$description = 'PHP函数'.$description;
-			break;
-		default:
-	}
-	$result = array("result"=>"error","code"=>$type,"description"=>$description);
-	$result = MyJson_decode($result);
-	die($result);
+function MySessionSet($key,$value){
+	MySessionStart();
+	$_SESSION[$key]=$value;
+	return true;
+}
+function MySessionGet($key){
+	MySessionStart();
+	return $_SESSION[$key];
+}
+function MySessionHave($key){
+	MySessionStart();
+	return isset($_SESSION[$key]);
+}
+function MySessionUnset($key){
+	MySessionStart();
+	unset($_SESSION[$key]);
+	return true;
+}
+function MySessionClear(){
+	//销毁所有的Session
+	//这之后即使对$_SESSION变量存取，也不会影响其它PHP请求
+	MySessionStart();
+	session_unset();
+	session_destroy();
+	return true;
 }
 
-//成功报告（仅限Success函数调用）
-function SuccessReport($data, $description)
-{
-	//待完成
-	$debug_backtrace = debug_backtrace();
-	$count = count($debug_backtrace);
-	unset($debug_backtrace[0]);
-	unset($debug_backtrace[1]);
+//网页跳转
+function MyRedirect($URL){
+	//注意：调用这些函数前不能有任何输出
+	//使用示例：MyRedirect("index.php");
+	//Chrome浏览器实测：302 Moved Temporarily
+	header('Location:'.$URL);
 }
-//异常报告（仅限Exception函数调用）
-function ExceptionReport($type, $description)
-{
-	//待完成
-	$debug_backtrace = debug_backtrace();
-	$count = count($debug_backtrace);
-	unset($debug_backtrace[0]);
-	unset($debug_backtrace[1]);
-	var_dump($debug_backtrace);
+function MyRedirect301($URL){
+	header('HTTP/1.1 301 Moved Permanently');
+	MyRedirect($URL);
 }
-//错误报告（仅限Error函数调用）
-function ErrorReport($type, $description)
-{
-	//待完成
-	$debug_backtrace = debug_backtrace();
-	$count = count($debug_backtrace);
-	unset($debug_backtrace[0]);
-	unset($debug_backtrace[1]);
-	var_dump($debug_backtrace);
+function MyRedirect302($URL){
+	header('HTTP/1.1 302 Found');
+	MyRedirect($URL);
+}
+function MyRedirect303($URL){
+	header('HTTP/1.1 303 See Other');
+	MyRedirect($URL);
+}
+function MyRedirect307($URL){
+	header('HTTP/1.1 307 Temporary Redirect');
+	MyRedirect($URL);
 }
 
-//当前被访问的网址的完整URL
+//Base64（用于URL的改进）编码
+function MyBase64Encode($data) { 
+	return rtrim(strtr(base64_encode($data), '+/', '-_'), '='); 
+}
+//Base64（用于URL的改进）解码
+function MyBase64Decode($data) {
+	return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT)); 
+}
+//数组转换保留为中文的JSON字符串
+function MyJsonEncode($data){
+	return urldecode(json_encode(MyUrlEncode($data)));
+	//需要PHP版本5.4以上：
+	//return json_encode($data,JSON_UNESCAPED_UNICODE);
+}
+//保留中文的JSON字符串转换为数组
+function MyJsonDecode($data){
+	$data = urlencode($data);
+	$data = str_replace("%7B",'{',$data);
+	$data = str_replace("%7D",'}',$data);
+	$data = str_replace("%5B",'[',$data);
+	$data = str_replace("%5D",']',$data);
+	$data = str_replace("%3A",':',$data);
+	$data = str_replace("%2C",',',$data);
+	$data = str_replace("%22",'"',$data);
+	return MyUrlDecode(json_decode($data,true));
+}
+//自定义的URL编码
+function MyUrlEncode($data) {
+	//可对关联数组进行URL编码，并处理换行符	
+	//内部递归调用
+	//用于MyJsonEncode函数调用
+	if(!is_array($data)){
+		$data = str_replace("\r",'\r',$data);
+		$data = str_replace("\n",'\n',$data);
+		$data = urlencode($data);
+	}
+	else {
+		foreach($data as $key=>$value) {
+			$data[MyUrlEncode($key)] = MyUrlEncode($value);
+			if(MyUrlEncode($key)!==$key){
+				unset($data[$key]);
+			}
+		}
+	}
+	return $data;
+}
+//自定义的URL解码
+function MyUrlDecode($data) {
+	//可对关联数组进行URL解码，并处理换行符	
+	//内部递归调用
+	//用于MyJsonDecode函数调用
+	if(!is_array($data)){
+		$data = urldecode($data);
+		$data = str_replace('\r',"\r",$data);
+		$data = str_replace('\n',"\n",$data);
+	}
+	else {
+		foreach($data as $key=>$value) {
+			$data[MyUrlDecode($key)] = MyUrlDecode($value);
+			if(MyUrlDecode($key)!==$key){
+				unset($data[$key]);
+			}
+		}
+	}
+	return $data;
+}
+
+//当前被访问的PHP的完整URL
 function MyCompleteURL()
 {
 	return $_SERVER['HTTP_HOST'] . ':' . $_SERVER['SERVER_PORT'] . $_SERVER['REQUEST_URI'];
 }
-//当前被访问的PHP文件的URL
+//当前被访问的PHP的文件URL
 function MyPhpURL()
 {
 	//strpos()函数返回字符串在另一个字符串中第一次出现的位置，如果没有找到该字符串，则返回false。
@@ -255,725 +149,539 @@ function MyPhpURL()
 	}
 	return $_SERVER['HTTP_HOST'] . ':' . $_SERVER['SERVER_PORT'] . $_SERVER['REQUEST_URI'];
 }
-
-//给指定名称的全局变量赋值
-function SetValue($ParameterName,$Value)
+//当前被访问的PHP的文件名称（含后缀）
+function MyPhpFullName()
 {
-	global ${$ParameterName};
-	${$ParameterName} = $Value;
+	return basename( __FILE__ );
 }
-//将POST的变量赋值为同名的全局变量（包含类型转换）
-function SetPost($ParameterName)
+//当前被访问的PHP的文件名称（不含后缀）
+function MyPhpName()
 {
-	global ${$ParameterName};
-	${$ParameterName} = $_POST[$ParameterName];
-}
-function SetPostFloat($ParameterName)
-{
-	global ${$ParameterName};
-	${$ParameterName} = (float)$_POST[$ParameterName];
-}
-function SetPostInteger($ParameterName)
-{
-	global ${$ParameterName};
-	${$ParameterName} = (int)$_POST[$ParameterName];
-}
-function SetPostDate($ParameterName)
-{
-	global ${$ParameterName};
-	${$ParameterName} = date('Y-m-d H:i:s', strtotime($_POST[$ParameterName]));
-}
-function SetPostBoolean($ParameterName)
-{
-	global ${$ParameterName};
-	if (strtolower($_POST[$ParameterName]) === 'true') {
-		${$ParameterName} = true;
-	} else {
-		${$ParameterName} = false;
-	}
-}
-function SetPostTinyInt($ParameterName)
-{
-	global ${$ParameterName};
-	if ($_POST[$ParameterName] === '1') {
-		${$ParameterName} = 1;
-	} else {
-		${$ParameterName} = 0;
-	}
-}
-//将Get的变量赋值为同名的全局变量（包含类型转换）
-function SetGet($ParameterName)
-{
-	global ${$ParameterName};
-	${$ParameterName} = $_GET[$ParameterName];
-}
-function SetGetFloat($ParameterName)
-{
-	global ${$ParameterName};
-	${$ParameterName} = (float)$_GET[$ParameterName];
-}
-function SetGetInteger($ParameterName)
-{
-	global ${$ParameterName};
-	${$ParameterName} = (int)$_GET[$ParameterName];
-}
-function SetGetDate($ParameterName)
-{
-	global ${$ParameterName};
-	${$ParameterName} = date('Y-m-d H:i:s', strtotime($_GET[$ParameterName]));
-}
-function SetGetBoolean($ParameterName)
-{
-	global ${$ParameterName};
-	if (strtolower($_GET[$ParameterName]) === 'true') {
-		${$ParameterName} = true;
-	} else {
-		${$ParameterName} = false;
-	}
-}
-function SetGetTinyInt($ParameterName)
-{
-	global ${$ParameterName};
-	if ($_GET[$ParameterName] === '1') {
-		${$ParameterName} = 1;
-	} else {
-		${$ParameterName} = 0;
-	}
-}
-//给不存在的Http参数赋值为默认初始值的全局变量（包含类型转换）
-function CheckSetDefault($ParameterName)
-{
-	if (!isset($_POST[$ParameterName]) && !isset($_GET[$ParameterName])) {
-		global ${$ParameterName};
-		${$ParameterName} = '';
-		return true; 
-	}
-	return false; 
-}
-function CheckSetDefaultFloat($ParameterName)
-{
-	if (!isset($_POST[$ParameterName]) && !isset($_GET[$ParameterName])) {
-		global ${$ParameterName};
-		${$ParameterName} = (float)0;
-		return true; 
-	}
-	return false; 
-}
-function CheckSetDefaultInteger($ParameterName)
-{
-	if (!isset($_POST[$ParameterName]) && !isset($_GET[$ParameterName])) {
-		global ${$ParameterName};
-		${$ParameterName} = (int)0;
-		return true; 
-	}
-	return false; 
-}
-function CheckSetDefaultDate($ParameterName)
-{
-	if (!isset($_POST[$ParameterName]) && !isset($_GET[$ParameterName])) {
-		global ${$ParameterName};
-		${$ParameterName} = date('Y-m-d H:i:s', 0);
-		return true; 
-	}
-	return false; 
-}
-function CheckSetDefaultBoolean($ParameterName)
-{
-	if (!isset($_POST[$ParameterName]) && !isset($_GET[$ParameterName])) {
-		global ${$ParameterName};
-		${$ParameterName} = false;
-		return true; 
-	}
-	return false; 
-}
-function CheckSetDefaultArray($ParameterName)
-{
-	if (!isset($_POST[$ParameterName]) && !isset($_GET[$ParameterName])) {
-		global ${$ParameterName};
-		${$ParameterName} = array();
-		return true; 
-	}
-	return false; 
+	return basename( __FILE__ , '.php');
 }
 
-//检验指定Http参数必须存在
-function ExistCheck($ParameterName)
+//将指定的值赋值为全局变量
+function MySetValue($Name,$Value)
 {
-	if (!isset($_POST[$ParameterName]) && !isset($_GET[$ParameterName])) {
-		MyException(Exception_Parameter_Missing, $ParameterName);
-	}
+	global ${$Name};
+	${$Name} = $Value;
+	return true;
+	//等效于在全局非函数的区域写了一句：
+	//${$Name} = $Value;
 }
-
-//检验PHP函数的参数的值必须为正整数
-function LengthCheck($FUNCTION,$LengthName,$Length)
+//将HTTP（POST）参数赋值为全局变量
+function MySetPost($ParameterName, $Length=0)
 {
-	if (!isset($Length) || !is_numeric($Length) || (int) $Length != (float) $Length || (int) $Length < 1) {
-		MyError(Error_PhpFunction_MistakenlyUsed, $FUNCTION.'的参数'.$LengthName.'必须为正整数，此次调用这个PHP函数，参数'.$LengthName.'的值为【' . $Length . '】');
+	if($Length==0){
+		if (isset($_POST[$ParameterName])) {return MySetValue($ParameterName,$_POST[$ParameterName]);}
 	}
+	else{
+		if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && strlen($_POST[$ParameterName]) == $Length) {return MySetValue($ParameterName,$_POST[$ParameterName]);}
+	}
+	return false;
 }
-//检验PHP函数的参数的值必须为时间字符串
-function TimeCheck($FUNCTION,$TimeName,$Time)
+function MySetPostString($ParameterName, $MinLength=0, $MaxLength=0)
 {
-	if (!isset($Time) || strtotime($Time) === false && strtotime($Time) === -1) {
-		MyError(Error_PhpFunction_MistakenlyUsed, $FUNCTION.'的参数'.$TimeName.'必须为表示时间的字符串，此次调用这个PHP函数，参数'.$TimeName.'的值为【' . $Time . '】');
+	if($MinLength===0 && $MaxLength===0){
+		if (isset($_POST[$ParameterName])) {return MySetValue($ParameterName,$_POST[$ParameterName]);}
 	}
+	else{
+		if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && mb_strlen($_POST[$ParameterName]) >= $MinLength && mb_strlen($_POST[$ParameterName]) <= $MaxLength) {return MySetValue($ParameterName,$_POST[$ParameterName]);}
+	}
+	return false;
 }
-//检验PHP函数的参数的值必须为数组
-function ArrayCheck($FUNCTION,$ArrayName,$Array)
+function MySetPostEnglish($ParameterName, $MinLength=0, $MaxLength=0)
 {
-	if (!isset($Array) || !is_array($Array)) {
-		MyError(Error_PhpFunction_MistakenlyUsed, $FUNCTION.'的参数'.$ArrayName.'必须为数组，此次调用这个PHP函数，参数'.$ArrayName.'的值为【' . $Array . '】');
+	if($MinLength===0 && $MaxLength===0){
+		if (isset($_POST[$ParameterName])) {return MySetValue($ParameterName,$_POST[$ParameterName]);}
 	}
+	else{
+		if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && strlen($_POST[$ParameterName]) >= $MinLength && strlen($_POST[$ParameterName]) <= $MaxLength && strlen($_POST[$ParameterName]) === mb_strlen($_POST[$ParameterName])) {return MySetValue($ParameterName,$_POST[$ParameterName]);}
+	}
+	return false;
 }
-//检验PHP函数的参数的值必须为已经定义的函数的名称
-function FunctionCheck($FUNCTION,$FunctionName,$Function)
+function MySetPostChinese($ParameterName, $MinLength=0, $MaxLength=0)
 {
-	if (!isset($Function) || !function_exists($Function)) {
-		MyError(Error_PhpFunction_MistakenlyUsed, $FUNCTION.'的参数'.$FunctionName.'必须为已经定义的函数的名称，此次调用这个PHP函数，参数'.$FunctionName.'的值为【' . $Function . '】');
+	if($MinLength===0 && $MaxLength===0){
+		if (isset($_POST[$ParameterName])) {return MySetValue($ParameterName,$_POST[$ParameterName]);}
 	}
+	else{
+		if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== ''  && mb_strlen($_POST[$ParameterName]) >= $MinLength && mb_strlen($_POST[$ParameterName]) <= $MaxLength && (float)strlen($_POST[$ParameterName])/3 === (float)mb_strlen($_POST[$ParameterName])) {return MySetValue($ParameterName,$_POST[$ParameterName]);}
+	}
+	return false;
 }
-//检验PHP函数的参数的值必须为非空字符串
-function StringCheck($FUNCTION,$StringName,$String)
+function MySetPostNotEmpty($ParameterName)
 {
-	if (!isset($String)) {
-		MyError(Error_PhpFunction_MistakenlyUsed, $FUNCTION.'的参数'.$StringName.'必须为非空字符串，此次调用这个PHP函数，参数'.$StringName.'的值未设置');
-	}
-	if ($String==="") {
-		MyError(Error_PhpFunction_MistakenlyUsed, $FUNCTION.'的参数'.$StringName.'必须为非空字符串，此次调用这个PHP函数，参数'.$StringName.'的值为空字符串');
-	}
-	if (!is_string($String)) {
-		MyError(Error_PhpFunction_MistakenlyUsed, $FUNCTION.'的参数'.$StringName.'必须为非空字符串，此次调用这个PHP函数，参数'.$StringName.'的值不是字符串');
-	}
+	if (isset($_POST[$ParameterName]) && !empty($_POST[$ParameterName])) {return MySetValue($ParameterName,$_POST[$ParameterName]);}
+	return false;
 }
-
-//对Http参数进行批量检验，参数为：要检验的Http参数名称的字符串数组，检验使用的函数名称（Must或Can），检验使用的函数的参数的数组（从第二位参数开始）
-function MyCheck($ParameterNameArray,$FunctionName,$FunctionParameterArray = array()){
-	//参数检验（第三个参数可选，但是只能设置为数组）
-	ArrayCheck(__FUNCTION__ , '$ParameterNameArray' , $ParameterNameArray );
-	ArrayCheck(__FUNCTION__ , '$FunctionParameterArray' , $FunctionParameterArray );
-	FunctionCheck(__FUNCTION__ , '$FunctionName' , $FunctionName );
-	//参数重新排列，将$ParameterNameArray[$i]添加到$FunctionParameterArray[0]
-	for($i = 1;$i<count($FunctionParameterArray);$i++){
-		$FunctionParameterArray[$i] = $FunctionParameterArray[$i-1];
-	}
-	for($i = 0;$i<count($ParameterNameArray);$i++){
-		$FunctionParameterArray[0] = $ParameterNameArray[$i];
-		call_user_func_array($FunctionName,$FunctionParameterArray);
-	}
-}
-
-//检验指定Http参数必须存在，并赋值为同名全局变量
-function MyMustExist($ParameterName)
+function MySetPostFloat($ParameterName)
 {
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	//此时Http参数的值可能为空字符串
-	if (isset($_POST[$ParameterName])) {SetPost($ParameterName);return;}
-	if (isset($_GET[$ParameterName])) {SetGet($ParameterName);return;}
-	MyException(Exception_Parameter_Missing, $ParameterName);
+	if (isset($_POST[$ParameterName]) && is_numeric($_POST[$ParameterName])) {return MySetValue($ParameterName,(float)$_POST[$ParameterName]);}
+	return false;
 }
-//检验指定Http参数必须存在且非零非空，并赋值为同名全局变量
-function MyMustNotEmpty($ParameterName)
+function MySetPostInteger($ParameterName)
+{
+	if (isset($_POST[$ParameterName]) && is_numeric($_POST[$ParameterName]) && (int) $_POST[$ParameterName] == (float) $_POST[$ParameterName]) {return MySetValue($ParameterName,(int)$_POST[$ParameterName]);}
+	return false;
+}
+function MySetPostBoolean($ParameterName)
+{
+	if (isset($_POST[$ParameterName]) && (strtolower($_POST[$ParameterName]) === 'true' || strtolower($_POST[$ParameterName]) === 'false')) {
+		if (strtolower($_POST[$ParameterName]) === 'true') {
+			$_POST[$ParameterName] = true;
+		} else {
+			$_POST[$ParameterName] = false;
+		}
+		return MySetValue($ParameterName,$_POST[$ParameterName]);
+	}
+	return false;
+}
+function MySetPostTinyInt($ParameterName)
+{
+	if (isset($_POST[$ParameterName]) && ($_POST[$ParameterName] === '0' || $_POST[$ParameterName] === '1')) {
+		if ($_POST[$ParameterName] === '1') {
+			$_POST[$ParameterName] = 1;
+		} else {
+			$_POST[$ParameterName] = 0;
+		}
+		return MySetValue($ParameterName,$_POST[$ParameterName]);
+	}
+	return false;
+}
+function MySetPostDigit($ParameterName, $Length=0)
+{
+	if($Length==0){
+		if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && ctype_digit($_POST[$ParameterName]))
+		{return MySetValue($ParameterName,$_POST[$ParameterName]);}
+	}
+	else{
+		if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && ctype_digit($_POST[$ParameterName]) && strlen($_POST[$ParameterName]) == $Length)
+		{return MySetValue($ParameterName,$_POST[$ParameterName]);}
+	}
+	return false;
+}
+function MySetPostDigitJsonArray($ParameterName)
+{
+	if (isset($_POST[$ParameterName]) && json_decode($_POST[$ParameterName],true) !== null && json_decode($_POST[$ParameterName],true) !==false) {
+		$temp = json_decode($_POST[$ParameterName],true);
+		foreach($temp as $item){
+			if($item === '' || !ctype_digit((string)$item)){
+				return false;
+			}
+		}
+		return MySetValue($ParameterName,$temp);
+	} 
+	return false;
+}
+function MySetPostTime($ParameterName, $MinTime='', $MaxTime='')
+{
+	if($MinTime==='' && $MinTime===''){
+		if (isset($_POST[$ParameterName]) && strtotime($_POST[$ParameterName]) !== false && strtotime($_POST[$ParameterName]) !== -1)
+		{return MySetValue($ParameterName,date('Y-m-d H:i:s', strtotime($_POST[$ParameterName])));}
+	}
+	else{
+		if (isset($_POST[$ParameterName]) && strtotime($_POST[$ParameterName]) !== false && strtotime($_POST[$ParameterName]) !== -1 && strtotime($_POST[$ParameterName]) >= strtotime($MinTime) && strtotime($_POST[$ParameterName]) <= strtotime($MaxTime))
+		{return MySetValue($ParameterName,date('Y-m-d H:i:s', strtotime($_POST[$ParameterName])));}
+	}
+	return false;
+}
+function MySetPostAlphaNumeric($ParameterName, $MinLength=0, $MaxLength=0)
+{
+	if($MinLength===0 && $MaxLength===0){
+		if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && ctype_alnum($_POST[$ParameterName]))
+			{return MySetValue($ParameterName,$_POST[$ParameterName]);}
+	}
+	else{
+		if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && ctype_alnum($_POST[$ParameterName]) && strlen($_POST[$ParameterName]) >= $MinLength && strlen($_POST[$ParameterName]) <= $MaxLength)
+			{return MySetValue($ParameterName,$_POST[$ParameterName]);}
+	}
+	return false;
+}
+//将HTTP（GET）参数赋值为全局变量
+function MySetGet($ParameterName, $Length=0)
+{
+	if($Length==0){
+		if (isset($_GET[$ParameterName])) {return MySetValue($ParameterName,$_GET[$ParameterName]);}
+	}
+	else{
+		if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && strlen($_GET[$ParameterName]) == $Length) {return MySetValue($ParameterName,$_GET[$ParameterName]);}
+	}
+	return false;
+}
+function MySetGetString($ParameterName, $MinLength=0, $MaxLength=0)
+{
+	if($MinLength===0 && $MaxLength===0){
+		if (isset($_GET[$ParameterName])) {return MySetValue($ParameterName,$_GET[$ParameterName]);}
+	}
+	else{
+		if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && mb_strlen($_GET[$ParameterName]) >= $MinLength && mb_strlen($_GET[$ParameterName]) <= $MaxLength) {return MySetValue($ParameterName,$_GET[$ParameterName]);}
+	}
+	return false;
+}
+function MySetGetEnglish($ParameterName, $MinLength=0, $MaxLength=0)
+{
+	if($MinLength===0 && $MaxLength===0){
+		if (isset($_GET[$ParameterName])) {return MySetValue($ParameterName,$_GET[$ParameterName]);}
+	}
+	else{
+		if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''   && strlen($_GET[$ParameterName]) >= $MinLength && strlen($_GET[$ParameterName]) <= $MaxLength && strlen($_GET[$ParameterName]) === mb_strlen($_GET[$ParameterName])) {return MySetValue($ParameterName,$_GET[$ParameterName]);}
+	}
+	return false;
+}
+function MySetGetChinese($ParameterName, $MinLength=0, $MaxLength=0)
+{
+	if($MinLength===0 && $MaxLength===0){
+		if (isset($_GET[$ParameterName])) {return MySetValue($ParameterName,$_GET[$ParameterName]);}
+	}
+	else{
+		if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && mb_strlen($_GET[$ParameterName]) >= $MinLength && mb_strlen($_GET[$ParameterName]) <= $MaxLength && (float)strlen($_GET[$ParameterName])/3 === (float)mb_strlen($_GET[$ParameterName])) {return MySetValue($ParameterName,$_GET[$ParameterName]);}
+	}
+	return false;
+}
+function MySetGetNotEmpty($ParameterName)
+{
+	if (isset($_GET[$ParameterName]) && !empty($_GET[$ParameterName])) {return MySetValue($ParameterName,$_GET[$ParameterName]);}
+	return false;
+}
+function MySetGetFloat($ParameterName)
+{
+	if (isset($_GET[$ParameterName]) && is_numeric($_GET[$ParameterName])) {return MySetValue($ParameterName,(float)$_GET[$ParameterName]);}
+	return false;
+}
+function MySetGetInteger($ParameterName)
+{
+	if (isset($_GET[$ParameterName]) && is_numeric($_GET[$ParameterName]) && (int) $_GET[$ParameterName] == (float) $_GET[$ParameterName]) {return MySetValue($ParameterName,(int)$_GET[$ParameterName]);}
+	return false;
+}
+function MySetGetBoolean($ParameterName)
+{
+	if (isset($_GET[$ParameterName]) && (strtolower($_GET[$ParameterName]) === 'true' || strtolower($_GET[$ParameterName]) === 'false')) {
+		if (strtolower($_GET[$ParameterName]) === 'true') {
+			$_GET[$ParameterName] = true;
+		} else {
+			$_GET[$ParameterName] = false;
+		}
+		return MySetValue($ParameterName,$_GET[$ParameterName]);
+	}
+	return false;
+}
+function MySetGetTinyInt($ParameterName)
+{
+	if (isset($_GET[$ParameterName]) && ($_GET[$ParameterName] === '0' || $_GET[$ParameterName] === '1')) {
+		if ($_GET[$ParameterName] === '1') {
+			$_GET[$ParameterName] = 1;
+		} else {
+			$_GET[$ParameterName] = 0;
+		}
+		return MySetValue($ParameterName,$_GET[$ParameterName]);
+	}
+	return false;
+}
+function MySetGetDigit($ParameterName, $Length=0)
+{
+	if($Length==0){
+		if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== '' && ctype_digit($_GET[$ParameterName]))
+			{return MySetValue($ParameterName,$_GET[$ParameterName]);}
+	}
+	else{
+		if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== '' && ctype_digit($_GET[$ParameterName]) && strlen($_GET[$ParameterName]) == $Length)
+			{return MySetValue($ParameterName,$_GET[$ParameterName]);}
+	}
+	return false;
+}
+function MySetGetDigitJsonArray($ParameterName)
+{
+	if (isset($_GET[$ParameterName]) && json_decode($_GET[$ParameterName],true) !== null && json_decode($_GET[$ParameterName],true) !==false) {
+		$temp = json_decode($_GET[$ParameterName],true);
+		foreach($temp as $item){
+			if($item === '' || !ctype_digit((string)$item)){
+				return false;
+			}
+		}
+		return MySetValue($ParameterName,$temp);
+	} 
+	return false;
+}
+function MySetGetTime($ParameterName, $MinTime='', $MaxTime='')
+{
+	if($MinTime==='' && $MinTime===''){
+		if (isset($_GET[$ParameterName]) && strtotime($_GET[$ParameterName]) !== false && strtotime($_GET[$ParameterName]) !== -1)
+		{return MySetValue($ParameterName,date('Y-m-d H:i:s', strtotime($_GET[$ParameterName])));}
+	}
+	else{
+		if (isset($_GET[$ParameterName]) && strtotime($_GET[$ParameterName]) !== false && strtotime($_GET[$ParameterName]) !== -1 && strtotime($_GET[$ParameterName]) >= strtotime($MinTime) && strtotime($_GET[$ParameterName]) <= strtotime($MaxTime))
+		{return MySetValue($ParameterName,date('Y-m-d H:i:s', strtotime($_GET[$ParameterName])));}
+	}
+	return false;
+}
+function MySetGetAlphaNumeric($ParameterName, $MinLength=0, $MaxLength=0)
+{
+	if($MinLength===0 && $MaxLength===0){
+		if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== '' && ctype_alnum($_GET[$ParameterName]))
+			{return MySetValue($ParameterName,$_GET[$ParameterName]);}
+	}
+	else{
+		if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== '' && ctype_alnum($_GET[$ParameterName]) && strlen($_GET[$ParameterName]) >= $MinLength && strlen($_GET[$ParameterName]) <= $MaxLength)
+			{return MySetValue($ParameterName,$_GET[$ParameterName]);}
+	}
+	return false;
+}
+//将HTTP（无视POST/GET）参数赋值为全局变量
+function MySetParameter($ParameterName, $Length=0)
+{
+	if (MySetPost($ParameterName, $Length)===false){
+		if (MySetGet($ParameterName, $Length)===false){
+			return false;
+		}
+	}
+	return true;
+}
+function MySetParameterString($ParameterName, $MinLength=0, $MaxLength=0)
+{
+	if (MySetPostString($ParameterName, $MinLength, $MaxLength)===false){
+		if (MySetGetString($ParameterName, $MinLength, $MaxLength)===false){
+			return false;
+		}
+	}
+	return true;
+}
+function MySetParameterEnglish($ParameterName, $MinLength=0, $MaxLength=0)
+{
+	if (MySetPostEnglish($ParameterName, $MinLength, $MaxLength)===false){
+		if (MySetGetEnglish($ParameterName, $MinLength, $MaxLength)===false){
+			return false;
+		}
+	}
+	return true;
+}
+function MySetParameterChinese($ParameterName, $MinLength=0, $MaxLength=0)
+{
+	if (MySetPostChinese($ParameterName, $MinLength, $MaxLength)===false){
+		if (MySetGetChinese($ParameterName, $MinLength, $MaxLength)===false){
+			return false;
+		}
+	}
+	return true;
+}
+function MySetParameterNotEmpty($ParameterName)
 {
 	//PHP中，0、""、null、false，用==判断是相等的，empty()都返回true，用===才能区分
 	//var_dump (""==false);//结果为：bool(true)
 	//var_dump (0==null);//结果为：bool(true)
 	//""、0、0.0、"0"、NULL、FALSE、array()、var $var; 以及没有任何属性的对象都被认为是空的，empty()都返回true
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	ExistCheck($ParameterName);
-	if (!empty($_POST[$ParameterName])) {SetPost($ParameterName);return;}
-	if (!empty($_GET[$ParameterName])) {SetGet($ParameterName);return;}
-	MyException(Exception_Parameter_Empty, $ParameterName);
+	if (MySetPostNotEmpty($ParameterName)===false){
+		if (MySetGetNotEmpty($ParameterName)===false){
+			return false;
+		}
+	}
+	return true;
 }
-//检验指定Http参数必须存在且为数值，并赋值为同名全局变量
-function MyMustNumeric($ParameterName)
+function MySetParameterFloat($ParameterName)
 {
-	//注意：(float)类型是有精度限制的，转换后不能保证无损失
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && is_numeric($_POST[$ParameterName])) {SetPostFloat($ParameterName);return;}
-	if (isset($_GET[$ParameterName]) && is_numeric($_GET[$ParameterName])) {SetGetFloat($ParameterName);return;}
-	MyException(Exception_Parameter_NotNumeric, $ParameterName);
+	if (MySetPostFloat($ParameterName)===false){
+		if (MySetGetFloat($ParameterName)===false){
+			return false;
+		}
+	}
+	return true;
 }
-//检验指定Http参数必须存在且为"true"或"false"，并赋值为同名全局变量
-function MyMustBoolean($ParameterName)
+function MySetParameterInteger($ParameterName)
 {
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && (strtolower($_POST[$ParameterName]) === 'true' || strtolower($_POST[$ParameterName]) === 'false')) {SetPostBoolean($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && (strtolower($_GET[$ParameterName]) === 'true' || strtolower($_GET[$ParameterName]) === 'false')) {SetGetBoolean($ParameterName);return;}
-	MyException(Exception_Parameter_NotBoolean, $ParameterName);
-}
-//检验指定Http参数必须存在且为"0"或"1"，并赋值为同名全局变量
-function MyMustTinyInt($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && ($_POST[$ParameterName] === '0' || $_POST[$ParameterName] === '1')) {SetPostTinyInt($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && ($_GET[$ParameterName] === '0' || $_GET[$ParameterName] === '1')) {SetGetTinyInt($ParameterName);return;} 
-	MyException(Exception_Parameter_NotTinyInt, $ParameterName);
-}
-//检验指定Http参数必须存在且为整数-2147483648到2147483647，并赋值为同名全局变量
-function MyMustInteger($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
 	//注意：(int)类型是有大小限制的，-2147483648到2147483647
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && is_numeric($_POST[$ParameterName]) && (int) $_POST[$ParameterName] == (float) $_POST[$ParameterName]) {SetPostInteger($ParameterName);return;}  
-	if (isset($_GET[$ParameterName]) && is_numeric($_GET[$ParameterName]) && (int) $_GET[$ParameterName] == (float) $_GET[$ParameterName]) {SetGetInteger($ParameterName);return;}  
-	MyException(Exception_Parameter_NotInteger, $ParameterName);
+	if (MySetPostInteger($ParameterName)===false){
+		if (MySetGetInteger($ParameterName)===false){
+			return false;
+		}
+	}
+	return true;
 }
-//检验指定Http参数必须存在且为数字0-9构成的非空字符串，并赋值为同名全局变量
-function MyMustDigit($ParameterName)
+function MySetParameterBoolean($ParameterName)
 {
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
+	if (MySetPostBoolean($ParameterName)===false){
+		if (MySetGetBoolean($ParameterName)===false){
+			return false;
+		}
+	}
+	return true;
+}
+function MySetParameterTinyInt($ParameterName)
+{
+	if (MySetPostTinyInt($ParameterName)===false){
+		if (MySetGetTinyInt($ParameterName)===false){
+			return false;
+		}
+	}
+	return true;
+}
+function MySetParameterDigit($ParameterName, $Length=0)
+{
 	//注意：ctype_digit检验字符串是否只由0-9构成
 	//5.1.0 在 PHP 5.1.0 之前，当 text 是一个空字符串的时候，ctype_digit将返回 TRUE
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && ctype_digit($_POST[$ParameterName])) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== '' && ctype_digit($_GET[$ParameterName])) {SetGet($ParameterName);return;} 
-	MyException(Exception_Parameter_NotDigit, $ParameterName);
+	//$Length=0时，表示不限制长度
+	if (MySetPostDigit($ParameterName, $Length)===false){
+		if (MySetGetDigit($ParameterName, $Length)===false){
+			return false;
+		}
+	}
+	return true;
 }
-//检验指定Http参数必须存在且为数字0-9构成的指定长度的非空字符串，并赋值为同名全局变量
-function MyMustLongDigit($ParameterName, $Length)
+function MySetParameterDigitJsonArray($ParameterName)
 {
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	//检验$Length：
-	LengthCheck(__FUNCTION__ , '$Length' , $Length );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && ctype_digit($_POST[$ParameterName]) && strlen($_POST[$ParameterName]) == $Length) {SetPost($ParameterName);return;}  
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== '' && ctype_digit($_GET[$ParameterName]) && strlen($_GET[$ParameterName]) == $Length) {SetGet($ParameterName);return;} 
-	MyException(Exception_Parameter_NotLongDigit, array($ParameterName,$Length) );
-}
-//检验指定Http参数必须存在且为字母和数字构成的非空字符串，并赋值为同名全局变量
-function MyMustAlphaNumeric($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && ctype_alnum($_POST[$ParameterName])) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== '' && ctype_alnum($_GET[$ParameterName])) {SetGet($ParameterName);return;} 
-	MyException(Exception_Parameter_NotAlphaNumeric, $ParameterName);
-}
-//检验指定Http参数必须存在且为字母和数字构成的指定长度的非空字符串，并赋值为同名全局变量
-function MyMustFixedAlphaNumeric($ParameterName, $MinLength, $MaxLength)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	//检验$MinLength和$MaxLength：
-	LengthCheck(__FUNCTION__ , '$MinLength' , $MinLength );
-	LengthCheck(__FUNCTION__ , '$MaxLength' , $MaxLength );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && ctype_alnum($_POST[$ParameterName]) && strlen($_POST[$ParameterName]) >= $MinLength && strlen($_POST[$ParameterName]) <= $MaxLength) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== '' && ctype_alnum($_GET[$ParameterName]) && strlen($_GET[$ParameterName]) >= $MinLength && strlen($_GET[$ParameterName]) <= $MaxLength) {SetGet($ParameterName);return;} 
-	MyException(Exception_Parameter_NotFixedAlphaNumeric, array($ParameterName, $MinLength, $MaxLength) );
-}
-//检验指定Http参数必须存在且为标准时间字符串，并赋值为同名全局变量
-function MyMustBeTime($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	//strtotime() 函数将任何英文文本的日期时间描述解析为 Unix 时间戳
-	//可以使用"now"，"last Sunday"，"+1 week 3 days 7 hours 5 seconds"，"today"，"tomorrow"等
-	//strtotime() 函数执行成功则返回时间戳，否则返回 FALSE，在 PHP 5.1.0 之前本函数在失败时返回 -1
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && strtotime($_POST[$ParameterName]) !== false && strtotime($_POST[$ParameterName]) !== -1) {SetPostDate($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && strtotime($_GET[$ParameterName]) !== false && strtotime($_GET[$ParameterName]) !== -1) {SetGetDate($ParameterName);return;} 
-	MyException(Exception_Parameter_NotTime, $ParameterName );
-}
-//检验指定Http参数必须存在且为标准时间字符串，并赋值为同名全局变量
-function MyMustBeFixedTime($ParameterName, $MinTime, $MaxTime)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	//检验$MinTime和$MaxTime：
-	TimeCheck(__FUNCTION__ , '$MinTime' , $MinTime );
-	TimeCheck(__FUNCTION__ , '$MaxTime' , $MaxTime );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && strtotime($_POST[$ParameterName]) !== false && strtotime($_POST[$ParameterName]) !== -1 && strtotime($_POST[$ParameterName]) >= strtotime($MinTime) && strtotime($_POST[$ParameterName]) <= strtotime($MaxTime)) {SetPostDate($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && strtotime($_GET[$ParameterName]) !== false && strtotime($_GET[$ParameterName]) !== -1 && strtotime($_GET[$ParameterName]) >= strtotime($MinTime) && strtotime($_GET[$ParameterName]) <= strtotime($MaxTime)) {SetGetDate($ParameterName);return;} 
-	MyException(Exception_Parameter_NotFixedAlphaNumeric, array($ParameterName, $MinLength, $MaxLength) );
-}
-//检验指定Http参数必须存在且为数字0-9构成的非空字符串的JSON数组，并赋值为同名全局变量
-function MyMustDigitJsonArray($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
 	//参数格式必须为[]或者[0,1,2,3]或者["0","1","2","3"]或[0,1.0,2.00,3.000]
 	//var_dump(json_decode("[]",true));//array(0) {}
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && json_decode($_POST[$ParameterName],true) !== null && json_decode($_POST[$ParameterName],true) !==false) {
-		//设置了POSTHttp参数
-		$temp = json_decode($_POST[$ParameterName],true);
-		for($i = 0;$i<count($temp);$i++){
-			if($temp[$i] === '' || !ctype_digit((string)$temp[$i])){
-				MyException(Exception_Parameter_NotDigitJsonArray, $ParameterName );						
-			}
+	if (MySetPostDigitJsonArray($ParameterName)===false){
+		if (MySetGetDigitJsonArray($ParameterName)===false){
+			return false;
 		}
-		Set($ParameterName,$temp);return;
-	} 
-	if (isset($_GET[$ParameterName]) && json_decode($_GET[$ParameterName],true) !== null && json_decode($_GET[$ParameterName],true) !==false) {
-		//设置了GETHttp参数
-		$temp = json_decode($_GET[$ParameterName],true);
-		for($i = 0;$i<count($temp);$i++){
-			if($temp[$i] === '' || !ctype_digit((string)$temp[$i])){
-				MyException(Exception_Parameter_NotDigitJsonArray, $ParameterName );						
-			}
-		}
-		Set($ParameterName,$temp);return;
 	}
-	MyException(Exception_Parameter_NotDigitJsonArray, $ParameterName );
+	return true;
 }
-//检验指定Http参数必须存在且为指定字节个数的字符串，并赋值为同名全局变量
-function MyMustLong($ParameterName, $Length)
+function MySetParameterTime($ParameterName, $MinTime='', $MaxTime='')
 {
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	//提示：strlen，1个中文会相当于3个英文
-	//检验$Length：
-	LengthCheck(__FUNCTION__ , '$Length' , $Length );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && strlen($_POST[$ParameterName]) == $Length) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && strlen($_GET[$ParameterName]) == $Length) {SetGet($ParameterName);return;} 
-	MyException(Exception_Parameter_NotLong, array($ParameterName, $Length) );
+	//strtotime() 函数将任何英文文本的日期时间描述解析为 Unix 时间戳
+	//可以使用"now"，"previous sunday"，"last Sunday"，"back of 24"，"+1 week 3 days 7 hours 5 seconds"，"today"，"tomorrow"等
+	//strtotime() 函数执行成功则返回时间戳，否则返回FALSE，在 PHP 5.1.0 之前本函数在失败时返回 -1
+	if (MySetPostTime($ParameterName, $MinTime ,$MaxTime )===false){
+		if (MySetGetTime($ParameterName, $MinTime ,$MaxTime )===false){
+			return false;
+		}
+	}
+	return true;
 }
-//检验指定Http参数必须存在且为指定长度的中英文字符字符串，并赋值为同名全局变量
-function MyMustLongCharacter($ParameterName, $Length)
+function MySetParameterAlphaNumeric($ParameterName, $MinLength=0, $MaxLength=0)
 {
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	//提示：mb_strlen，1个中文相当于1个英文
-	//检验$Length：
-	LengthCheck(__FUNCTION__ , '$Length' , $Length );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && mb_strlen($_POST[$ParameterName]) == $Length) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && mb_strlen($_GET[$ParameterName]) == $Length) {SetGet($ParameterName);return;} 
-	MyException(Exception_Parameter_NotLongCharacter, array($ParameterName, $Length) );
-}
-//检验指定Http参数必须存在且为指定长度的纯英文字符字符串，并赋值为同名全局变量
-function MyMustLongEnglish($ParameterName, $Length)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	//提示：mb_strlen，1个中文相当于1个英文
-	//检验$Length：
-	LengthCheck(__FUNCTION__ , '$Length' , $Length );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && strlen($_POST[$ParameterName]) == $Length && strlen($_POST[$ParameterName]) === mb_strlen($_POST[$ParameterName])) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && strlen($_GET[$ParameterName]) == $Length && strlen($_GET[$ParameterName]) === mb_strlen($_GET[$ParameterName])) {SetGet($ParameterName);return;} 
-	MyException(Exception_Parameter_NotLongEnglish, array($ParameterName, $Length) );
-}
-//检验指定Http参数必须存在且为指定长度的纯中文字符字符串，并赋值为同名全局变量
-function MyMustLongChinese($ParameterName, $Length)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	//提示：mb_strlen，1个中文相当于1个英文
-	//检验$Length：
-	LengthCheck(__FUNCTION__ , '$Length' , $Length );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && mb_strlen($_POST[$ParameterName]) == $Length && (float)strlen($_POST[$ParameterName])/3 === (float)mb_strlen($_POST[$ParameterName]) ) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && mb_strlen($_GET[$ParameterName]) == $Length && (float)strlen($_GET[$ParameterName])/3 === (float)mb_strlen($_GET[$ParameterName])) {SetGet($ParameterName);return;} 
-	MyException(Exception_Parameter_NotLongChinese, array($ParameterName, $Length) );
-}
-//检验指定Http参数必须存在且为指定字节个数的字符串，并赋值为同名全局变量
-function MyMustFixedLong($ParameterName, $MinLength, $MaxLength)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	//提示：strlen，1个中文会相当于3个英文
-	LengthCheck(__FUNCTION__ , '$MinLength' , $MinLength );
-	LengthCheck(__FUNCTION__ , '$MaxLength' , $MaxLength );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && strlen($_POST[$ParameterName]) >= $MinLength && strlen($_POST[$ParameterName]) <= $MaxLength) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && strlen($_GET[$ParameterName]) >= $MinLength && strlen($_GET[$ParameterName]) <= $MaxLength) {SetGet($ParameterName);return;} 
-	MyException(Exception_Parameter_NotFixedLong, array($ParameterName, $MinLength, $MaxLength) );
-}
-//检验指定Http参数必须存在且为指定长度的中英文字符的字符串，并赋值为同名全局变量
-function MyMustFixedLongCharacter($ParameterName, $MinLength, $MaxLength)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	//提示：mb_strlen，1个中文相当于1个英文
-	//检验$Length：
-	LengthCheck(__FUNCTION__ , '$MinLength' , $MinLength );
-	LengthCheck(__FUNCTION__ , '$MaxLength' , $MaxLength );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && mb_strlen($_POST[$ParameterName]) >= $MinLength && mb_strlen($_POST[$ParameterName]) <= $MaxLength) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && mb_strlen($_GET[$ParameterName]) >= $MinLength && mb_strlen($_GET[$ParameterName]) <= $MaxLength) {SetGet($ParameterName);return;} 
-	MyException(Exception_Parameter_NotFixedLongCharacter, array($ParameterName, $MinLength, $MaxLength) );
-}
-//检验指定Http参数必须存在且为指定长度的纯英文字符的字符串，并赋值为同名全局变量
-function MyMustFixedLongEnglish($ParameterName, $MinLength, $MaxLength)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	//提示：mb_strlen，1个中文相当于1个英文
-	//检验$Length：
-	LengthCheck(__FUNCTION__ , '$MinLength' , $MinLength );
-	LengthCheck(__FUNCTION__ , '$MaxLength' , $MaxLength );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && strlen($_POST[$ParameterName]) >= $MinLength && strlen($_POST[$ParameterName]) <= $MaxLength && strlen($_POST[$ParameterName]) === mb_strlen($_POST[$ParameterName])) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && strlen($_GET[$ParameterName]) >= $MinLength && strlen($_GET[$ParameterName]) <= $MaxLength && strlen($_GET[$ParameterName]) === mb_strlen($_GET[$ParameterName])) {SetGet($ParameterName);return;} 
-	MyException(Exception_Parameter_NotFixedLongEnglish, array($ParameterName, $MinLength, $MaxLength) );
-}
-//检验指定Http参数必须存在且为指定长度的纯中文字符的字符串，并赋值为同名全局变量
-function MyMustFixedLongChinese($ParameterName, $MinLength, $MaxLength)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	//提示：mb_strlen，1个中文相当于1个英文
-	//检验$Length：
-	LengthCheck(__FUNCTION__ , '$MinLength' , $MinLength );
-	LengthCheck(__FUNCTION__ , '$MaxLength' , $MaxLength );
-	ExistCheck($ParameterName);
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && mb_strlen($_POST[$ParameterName]) >= $MinLength && mb_strlen($_POST[$ParameterName]) <= $MaxLength && (float)strlen($_POST[$ParameterName])/3 === (float)mb_strlen($_POST[$ParameterName]) ) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && mb_strlen($_GET[$ParameterName]) >= $MinLength && mb_strlen($_GET[$ParameterName]) <= $MaxLength && (float)strlen($_GET[$ParameterName])/3 === (float)mb_strlen($_GET[$ParameterName])) {SetGet($ParameterName);return;} 
-	MyException(Exception_Parameter_NotFixedLongChinese, array($ParameterName, $MinLength, $MaxLength) );
+	//字母和数字构成的指定长度的非空字符串
+	//$MinLength=0, $MaxLength=0时，表示不限制长度
+	if (MySetPostAlphaNumeric($ParameterName, $MinLength, $MaxLength)===false){
+		if (MySetGetAlphaNumeric($ParameterName, $MinLength, $MaxLength)===false){
+			return false;
+		}
+	}
+	return true;
 }
 
-//检验可选Http参数是否存在，并赋值为同名全局变量（默认赋值为""）
-function MyCanExist($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName])) {SetPost($ParameterName);return;}
-	if (isset($_GET[$ParameterName])) {SetGet($ParameterName);return;}
-}
-//检验可选Http参数是否存在且非零非空，并赋值为同名全局变量（默认赋值为""）
-function MyCanNotEmpty($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (!empty($_POST[$ParameterName])) {SetPost($ParameterName);return;}
-	if (!empty($_GET[$ParameterName])) {SetGet($ParameterName);return;}
-	MyException(Exception_OptionalParameter_Empty, $ParameterName);
-}
-//检验可选Http参数是否存在且为数值，并赋值为同名全局变量（默认赋值为(float)0）
-function MyCanNumeric($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	if(CheckSetDefaultFloat($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && is_numeric($_POST[$ParameterName])) {SetPostFloat($ParameterName);return;}
-	if (isset($_GET[$ParameterName]) && is_numeric($_GET[$ParameterName])) {SetGetFloat($ParameterName);return;}
-	MyException(Exception_OptionalParameter_NotNumeric, $ParameterName);
-}
-//检验可选Http参数是否存在且为"true"或"false"，并赋值为同名全局变量（默认赋值为false）
-function MyCanBoolean($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	if(CheckSetDefaultBoolean($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && (strtolower($_POST[$ParameterName]) === 'true' || strtolower($_POST[$ParameterName]) === 'false')) {SetPostBoolean($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && (strtolower($_GET[$ParameterName]) === 'true' || strtolower($_GET[$ParameterName]) === 'false')) {SetGetBoolean($ParameterName);return;}
-	MyException(Exception_OptionalParameter_NotBoolean, $ParameterName);
-}
-//检验可选Http参数是否存在且为"0"或"1"，并赋值为同名全局变量（默认赋值为0）
-function MyCanTinyInt($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	if(CheckSetDefaultInteger($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && ($_POST[$ParameterName] === '0' || $_POST[$ParameterName] === '1')) {SetPostTinyInt($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && ($_GET[$ParameterName] === '0' || $_GET[$ParameterName] === '1')) {SetGetTinyInt($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotTinyInt, $ParameterName);
-}
-//检验可选Http参数是否存在且为整数-2147483648到2147483647，并赋值为同名全局变量并赋值同名变量（默认赋值为0）
-function MyCanInteger($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	if(CheckSetDefaultInteger($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && is_numeric($_POST[$ParameterName]) && (int) $_POST[$ParameterName] == (float) $_POST[$ParameterName]) {SetPostInteger($ParameterName);return;}  
-	if (isset($_GET[$ParameterName]) && is_numeric($_GET[$ParameterName]) && (int) $_GET[$ParameterName] == (float) $_GET[$ParameterName]) {SetGetInteger($ParameterName);return;}  
-	MyException(Exception_OptionalParameter_NotInteger, $ParameterName);
-}
-//检验可选Http参数是否存在且为数字0-9构成的非空字符串，并赋值为同名全局变量（默认赋值为""）
-function MyCanDigit($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && ctype_digit($_POST[$ParameterName])) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== '' && ctype_digit($_GET[$ParameterName])) {SetGet($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotDigit, $ParameterName);
-}
-//检验可选Http参数是否存在且为数字0-9构成的指定长度的非空字符串，并赋值为同名全局变量（默认赋值为""）
-function MyCanLongDigit($ParameterName, $Length)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	LengthCheck(__FUNCTION__ , '$Length' , $Length );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && ctype_digit($_POST[$ParameterName]) && strlen($_POST[$ParameterName]) == $Length) {SetPost($ParameterName);return;}  
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== '' && ctype_digit($_GET[$ParameterName]) && strlen($_GET[$ParameterName]) == $Length) {SetGet($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotLongDigit, array($ParameterName,$Length) );
-}
-//检验可选Http参数是否存在且为字母和数字构成的非空字符串，并赋值为同名全局变量（默认赋值为""）
-function MyCanAlphaNumeric($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && ctype_alnum($_POST[$ParameterName])) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== '' && ctype_alnum($_GET[$ParameterName])) {SetGet($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotAlphaNumeric, $ParameterName);
-}
-//检验可选Http参数是否存在且为字母和数字构成的指定长度的非空字符串，并赋值为同名全局变量（默认赋值为""）
-function MyCanFixedAlphaNumeric($ParameterName, $MinLength, $MaxLength)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	LengthCheck(__FUNCTION__ , '$MinLength' , $MinLength );
-	LengthCheck(__FUNCTION__ , '$MaxLength' , $MaxLength );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && ctype_alnum($_POST[$ParameterName]) && strlen($_POST[$ParameterName]) >= $MinLength && strlen($_POST[$ParameterName]) <= $MaxLength) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== '' && ctype_alnum($_GET[$ParameterName]) && strlen($_GET[$ParameterName]) >= $MinLength && strlen($_GET[$ParameterName]) <= $MaxLength) {SetGet($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotFixedAlphaNumeric, array($ParameterName, $MinLength, $MaxLength) );
-}
-//检验可选Http参数是否存在且为标准时间字符串，并赋值为同名全局变量（默认赋值为"1970-01-01 08:00:00"）
-function MyCanBeTime($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	if(CheckSetDefaultDate($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && strtotime($_POST[$ParameterName]) !== false && strtotime($_POST[$ParameterName]) !== -1) {SetPostDate($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && strtotime($_GET[$ParameterName]) !== false && strtotime($_GET[$ParameterName]) !== -1) {SetGetDate($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotTime, $ParameterName );
-}
-//检验可选Http参数是否存在且为标准时间字符串，并赋值为同名全局变量（默认赋值为"1970-01-01 08:00:00"）
-function MyCanBeFixedTime($ParameterName, $MinTime, $MaxTime)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	TimeCheck(__FUNCTION__ , '$MinTime' , $MinTime );
-	TimeCheck(__FUNCTION__ , '$MaxTime' , $MaxTime );
-	if(CheckSetDefaultDate($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && strtotime($_POST[$ParameterName]) !== false && strtotime($_POST[$ParameterName]) !== -1 && strtotime($_POST[$ParameterName]) >= strtotime($MinTime) && strtotime($_POST[$ParameterName]) <= strtotime($MaxTime)) {SetPostDate($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && strtotime($_GET[$ParameterName]) !== false && strtotime($_GET[$ParameterName]) !== -1 && strtotime($_GET[$ParameterName]) >= strtotime($MinTime) && strtotime($_GET[$ParameterName]) <= strtotime($MaxTime)) {SetGetDate($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotFixedAlphaNumeric, array($ParameterName, $MinLength, $MaxLength) );
-}
-//检验可选Http参数是否存在且为数字0-9构成的非空字符串的JSON数组，并赋值为同名全局变量（默认赋值为array()）
-function MyCanDigitJsonArray($ParameterName)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	if(CheckSetDefaultArray($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && json_decode($_POST[$ParameterName],true) !== null && json_decode($_POST[$ParameterName],true) !==false) {
-		//设置了POSTHttp参数
-		$temp = json_decode($_POST[$ParameterName],true);
-		for($i = 0;$i<count($temp);$i++){
-			if($temp[$i] === '' || !ctype_digit((string)$temp[$i])){
-				MyException(Exception_OptionalParameter_NotDigitJsonArray, $ParameterName );						
-			}
+//执行多次调用其它函数的函数
+function My($FunctionName,$FunctionParameterArray = array(array())){
+	//__FUNCTION__用于指代当前函数名称
+	if(count($FunctionParameterArray) === 1){
+		if(!is_array($FunctionParameterArray[0])){
+			$FunctionParameterArray[0] = array($FunctionParameterArray[0]);
 		}
-		Set($ParameterName,$temp);return;
-	} 
-	if (isset($_GET[$ParameterName]) && json_decode($_GET[$ParameterName],true) !== null && json_decode($_GET[$ParameterName],true) !==false) {
-		//设置了GETHttp参数
-		$temp = json_decode($_GET[$ParameterName],true);
-		for($i = 0;$i<count($temp);$i++){
-			if($temp[$i] === '' || !ctype_digit((string)$temp[$i])){
-				MyException(Exception_OptionalParameter_NotDigitJsonArray, $ParameterName );						
-			}
-		}
-		Set($ParameterName,$temp);return;
+		return call_user_func_array($FunctionName,$FunctionParameterArray[0]);
 	}
-	MyException(Exception_OptionalParameter_NotDigitJsonArray, $ParameterName );
-}
-//检验可选Http参数是否存在且为指定字节个数的字符串，并赋值为同名全局变量（默认赋值为""）
-function MyCanLong($ParameterName, $Length)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	LengthCheck(__FUNCTION__ , '$Length' , $Length );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && strlen($_POST[$ParameterName]) == $Length) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && strlen($_GET[$ParameterName]) == $Length) {SetGet($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotLong, array($ParameterName, $Length) );
-}
-//检验可选Http参数是否存在且为指定长度的中英文字符字符串，并赋值为同名全局变量（默认赋值为""）
-function MyCanLongCharacter($ParameterName, $Length)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	LengthCheck(__FUNCTION__ , '$Length' , $Length );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && mb_strlen($_POST[$ParameterName]) == $Length) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && mb_strlen($_GET[$ParameterName]) == $Length) {SetGet($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotLongCharacter, array($ParameterName, $Length) );
-}
-//检验可选Http参数是否存在且为指定长度的纯英文字符字符串，并赋值为同名全局变量（默认赋值为""）
-function MyCanLongEnglish($ParameterName, $Length)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	LengthCheck(__FUNCTION__ , '$Length' , $Length );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && strlen($_POST[$ParameterName]) == $Length && strlen($_POST[$ParameterName]) === mb_strlen($_POST[$ParameterName])) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && strlen($_GET[$ParameterName]) == $Length && strlen($_GET[$ParameterName]) === mb_strlen($_GET[$ParameterName])) {SetGet($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotLongEnglish, array($ParameterName, $Length) );
-}
-//检验可选Http参数是否存在且为指定长度的纯中文字符字符串，并赋值为同名全局变量（默认赋值为""）
-function MyCanLongChinese($ParameterName, $Length)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	LengthCheck(__FUNCTION__ , '$Length' , $Length );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && mb_strlen($_POST[$ParameterName]) == $Length && (float)strlen($_POST[$ParameterName])/3 === (float)mb_strlen($_POST[$ParameterName]) ) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && mb_strlen($_GET[$ParameterName]) == $Length && (float)strlen($_GET[$ParameterName])/3 === (float)mb_strlen($_GET[$ParameterName])) {SetGet($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotLongChinese, array($ParameterName, $Length) );
-}
-//检验可选Http参数是否存在且为指定字节个数的字符串，并赋值为同名全局变量（默认赋值为""）
-function MyCanFixedLong($ParameterName, $MinLength, $MaxLength)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	LengthCheck(__FUNCTION__ , '$MinLength' , $MinLength );
-	LengthCheck(__FUNCTION__ , '$MaxLength' , $MaxLength );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && strlen($_POST[$ParameterName]) >= $MinLength && strlen($_POST[$ParameterName]) <= $MaxLength) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && strlen($_GET[$ParameterName]) >= $MinLength && strlen($_GET[$ParameterName]) <= $MaxLength) {SetGet($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotFixedLong, array($ParameterName, $MinLength, $MaxLength) );
-}
-//检验可选Http参数是否存在且为指定长度的中英文字符的字符串，并赋值为同名全局变量（默认赋值为""）
-function MyCanFixedLongCharacter($ParameterName, $MinLength, $MaxLength)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	LengthCheck(__FUNCTION__ , '$MinLength' , $MinLength );
-	LengthCheck(__FUNCTION__ , '$MaxLength' , $MaxLength );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && mb_strlen($_POST[$ParameterName]) >= $MinLength && mb_strlen($_POST[$ParameterName]) <= $MaxLength) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && mb_strlen($_GET[$ParameterName]) >= $MinLength && mb_strlen($_GET[$ParameterName]) <= $MaxLength) {SetGet($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotFixedLongCharacter, array($ParameterName, $MinLength, $MaxLength) );
-}
-//检验可选Http参数是否存在且为指定长度的纯英文字符的字符串，并赋值为同名全局变量（默认赋值为""）
-function MyCanFixedLongEnglish($ParameterName, $MinLength, $MaxLength)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	LengthCheck(__FUNCTION__ , '$MinLength' , $MinLength );
-	LengthCheck(__FUNCTION__ , '$MaxLength' , $MaxLength );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && strlen($_POST[$ParameterName]) >= $MinLength && strlen($_POST[$ParameterName]) <= $MaxLength && strlen($_POST[$ParameterName]) === mb_strlen($_POST[$ParameterName])) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && strlen($_GET[$ParameterName]) >= $MinLength && strlen($_GET[$ParameterName]) <= $MaxLength && strlen($_GET[$ParameterName]) === mb_strlen($_GET[$ParameterName])) {SetGet($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotFixedLongEnglish, array($ParameterName, $MinLength, $MaxLength) );
-}
-//检验可选Http参数是否存在且为指定长度的纯中文字符的字符串，并赋值为同名全局变量（默认赋值为""）
-function MyCanFixedLongChinese($ParameterName, $MinLength, $MaxLength)
-{
-	StringCheck(__FUNCTION__ , '$ParameterName' , $ParameterName );
-	LengthCheck(__FUNCTION__ , '$MinLength' , $MinLength );
-	LengthCheck(__FUNCTION__ , '$MaxLength' , $MaxLength );
-	if(CheckSetDefault($ParameterName)===true){return;}
-	if (isset($_POST[$ParameterName]) && $_POST[$ParameterName] !== '' && mb_strlen($_POST[$ParameterName]) >= $MinLength && mb_strlen($_POST[$ParameterName]) <= $MaxLength && (float)strlen($_POST[$ParameterName])/3 === (float)mb_strlen($_POST[$ParameterName]) ) {SetPost($ParameterName);return;} 
-	if (isset($_GET[$ParameterName]) && $_GET[$ParameterName] !== ''  && mb_strlen($_GET[$ParameterName]) >= $MinLength && mb_strlen($_GET[$ParameterName]) <= $MaxLength && (float)strlen($_GET[$ParameterName])/3 === (float)mb_strlen($_GET[$ParameterName])) {SetGet($ParameterName);return;} 
-	MyException(Exception_OptionalParameter_NotFixedLongChinese, array($ParameterName, $MinLength, $MaxLength) );
+	else{
+		foreach($FunctionParameterArray as $ParameterArray){
+			if(!is_array($ParameterArray)){
+				$ParameterArray = array($ParameterArray);
+			}
+			call_user_func_array($FunctionName,$ParameterArray);
+		}
+		return true;
+	}
+	//示例用法（检验多个参数）：
+	//My("MySetGet",array("A","B"));
+	//等效于如下：
+	//My("MySetGet",array(array("A"),array("B")))
+	//var_dump($A);
+	//var_dump($B);
+	//var_dump(My("MyPhpURL"));
 }
 
-//用于URL的改进Base64编码
-function MyUrlBase64_encode($data) { 
-	return rtrim(strtr(base64_encode($data), '+/', '-_'), '='); 
+//返回API执行结果（执行die输出）
+function MySuccess($data='', $description='执行成功')
+{
+	MySuccessReport($data, $description);
+	$result = array("result"=>"success","data"=>(string)$data,"description"=>(string)$description);
+	//$result = json_encode($result);
+	$result = MyJsonEncode($result);
+	die($result);
 }
-//用于URL的改进Base64解码
-function MyUrlBase64_decode($data) {
-	return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT)); 
+function MyException($type='', $description='执行异常'){
+	MyExceptionReport($type, $description);
+	$result = array("result"=>"exception","type"=>(string)$type,"description"=>(string)$description);
+	//$result = json_encode($result);
+	$result = MyJsonEncode($result);
+	die($result);
 }
-//对数组进行URL编码并处理换行（递归调用，用于MyJson_decode函数调用）
-function ArrayUrl_encode($data) {
-	if(is_array($data)){
-		foreach($data as $key=>$value) {
-			$data[ArrayUrl_encode($key)] = ArrayUrl_encode($value);
-		}
-	}
-	else {
-		$data = str_replace("\r",'\r',$data);
-		$data = str_replace("\n",'\n',$data);
-		$data = urlencode($data);
-	}
-	return $data;
+function MyError($type='', $description='执行失败'){
+	MyErrorReport($type, $description);
+	$result = array("result"=>"error","type"=>(string)$type,"description"=>(string)$description);
+	//$result = json_encode($result);
+	$result = MyJsonEncode($result);
+	die($result);
 }
-//保留中文的JSON转换字符串函数
-function MyJson_encode($data){
-	//var_dump(ArrayUrl_encode($data));
-	//var_dump(json_encode(ArrayUrl_encode($data)));
-	//var_dump(urldecode(json_encode(ArrayUrl_encode($data))));
-	return urldecode(json_encode(ArrayUrl_encode($data)));
-	//需要PHP版本5.4以上：
-	//return json_encode($data,JSON_UNESCAPED_UNICODE);
+//API执行结果的收集（用于监控、调优和Debug等）
+function MySuccessReport($data='', $description='执行成功')
+{
+	$debug_backtrace = debug_backtrace();
+	$count = count($debug_backtrace);
+	if($debug_backtrace[0]["function"]==="MySuccessReport"){unset($debug_backtrace[0]);}
+	if($debug_backtrace[1]["function"]==="MySuccess"){unset($debug_backtrace[1]);}
+	//var_dump($debug_backtrace);
+	//待完成
+}
+function MyExceptionReport($type='', $description='执行异常')
+{
+	$debug_backtrace = debug_backtrace();
+	$count = count($debug_backtrace);
+	if($debug_backtrace[0]["function"]==="MyExceptionReport"){unset($debug_backtrace[0]);}
+	if($debug_backtrace[1]["function"]==="MyException"){unset($debug_backtrace[1]);}
+	//var_dump($debug_backtrace);
+	//待完成
+}
+function MyErrorReport($type='', $description='执行失败')
+{
+	$debug_backtrace = debug_backtrace();
+	$count = count($debug_backtrace);
+	if($debug_backtrace[0]["function"]==="MyErrorReport"){unset($debug_backtrace[0]);}
+	if($debug_backtrace[1]["function"]==="MyError"){unset($debug_backtrace[1]);}
+	//var_dump($debug_backtrace);
+	//待完成
 }
 
-//未完待续
+//全局的错误、异常处理和脚本结束前的处理
+function ErrorHandler($errno , $errstr , $errfile ,$errline , $errcontext){
+	//echo "errno：";var_dump($errno);
+	//echo "errstr：";var_dump($errstr);
+	//echo "errfile：";var_dump($errfile);
+	//echo "errline：";var_dump($errline);
+	//echo "errcontext：";var_dump($errcontext);
+	MyError('全局错误捕捉',$errfile."[行号".$errline."]".$errstr);
+	//示例：
+	//（手动创建错误）trigger_error("Uncaught Error",E_USER_WARNING);
+	//注意：
+	//无法处理：E_ERROR、E_PARSE、E_CORE_ERROR、E_CORE_WARNING、 E_COMPILE_ERROR、E_COMPILE_WARNING
+	//无法处理：Parse error（解析错误）或Fatal error（致命错误）等
+	//Parse error: syntax error, unexpected end of file
+	//Fatal error: Call to undefined function
+	//可以处理：E_USER_ERROR、E_USER_WARNING、E_USER_NOTICE
+	//Notice: Undefined variable
+}
+set_error_handler("ErrorHandler",E_ALL);
+function ExceptionHandler($exception){
+	//var_dump($exception);
+	//echo "code：";var_dump($exception->getCode());
+	//echo "message：";var_dump($exception->getMessage());
+	//echo "file：";var_dump($exception->getFile());
+	//echo "line：";var_dump($exception->getLine());
+	//echo "trace：";var_dump($exception->getTrace());
+	MyError('全局异常捕捉',$exception->getFile()."[行号".$exception->getLine()."]".$exception->getMessage());
+	//示例：
+	//（手动创建异常）throw new Exception('Uncaught Exception');
+	//注意：
+	//在这个异常处理程序被调用后，脚本会停止执行	
+}
+set_exception_handler("ExceptionHandler");
+function FinishHandler(){
+	//注意：
+	//register_shutdown_function是指在执行完所有PHP语句后再调用函数，不要理解成客户端关闭流浏览器页面时调用函数
+	//可以这样理解调用条件：1、当页面被用户强制停止时  2、当程序代码运行超时时  3、当PHP代码执行完成时
+	//发生了Fatal error: Call to undefined function时，ErrorHandler不被调用，但是FinishHandler会执行
+	//发生了Parse error: syntax error, unexpected end of file时，ErrorHandler不被调用，FinishHandler也不会执行
+	echo "Finish";
+}
+register_shutdown_function("FinishHandler");//注意：这个函数一定会在脚本结束前执行一次
+
 
 ?>
