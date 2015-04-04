@@ -284,6 +284,74 @@ function ResultTransform(&$Array){
 	}
 	//因为有这个函数的存在，所以SaeMySQLSelectCell可能返回的是一个数组
 }
+//自定义的SQL防止注入检查的函数
+function SaeMySQLCheck(&$value)
+{
+	//去除斜杠(服务器配置给予的转义斜杠)
+	if (get_magic_quotes_gpc())
+	{
+		$value = stripslashes($value);
+	}
+	//如果不是数字则加引号（专业的转义函数）
+	if (!is_numeric($value))
+	{
+		$value = "'" . mysql_real_escape_string($value) . "'";
+	}
+	return $value;
+	//示例用法：
+	//$user = SQLCheck($_POST['user']);
+	//$pwd = SQLCheck($_POST['pwd']);
+	//$sql = "SELECT * FROM users WHERE user = $user AND password = $pwd";
+}
+//自定义的生成Select内连接查询的SQL语句的函数
+function SaeMySQLCreateSelect(){
+	$num_args=func_num_args();
+	if($num_args === 0 || $num_args % 3 !== 0){
+		return false;
+	}
+	$get_args=func_get_args();
+	$TableString = '';
+	$ColumnString = '';
+	$ConditionString = '';
+	for($I = 0; $I < $num_args; $I = $I +3){
+		$temp = $get_args[$I];
+		$TableString .='`'.$temp.'` , ';
+		foreach($get_args[$I+1] as $column){
+			$ColumnString .= '`'.$temp.'`.`'.$column.'` , ';
+		}
+		foreach($get_args[$I+2] as $key => $value){
+			if(is_array($value)===false){
+				if(is_numeric($value)===false  && strpos($value,'.')!==false){//参数$value为"表名.字段"
+					$value = '`' . str_replace('.','`.`',$value) . '`';//补充"`"符号
+				}
+				$ConditionString .=  '`'.$temp.'`.`' . $key . '` = ' . $value . ' and ';
+			}
+			else{
+				$ConditionString .=  '( ';
+				foreach($value as $v){
+					if(is_numeric($v)===false  && strpos($v,'.')!==false){//参数$value包含"表名.字段"
+						$v = '`' . str_replace('.','`.`',$v) . '`';//补充"`"符号
+					}
+					$ConditionString .=  '`'.$temp.'`.`' . $key . '` = ' . $v . ' or ';
+				}
+				$ConditionString = substr($ConditionString,0,strlen($ConditionString)-3);
+				$ConditionString .=  ') and ';
+			}
+		}
+	}
+	$TableString= substr($TableString,0,strlen($TableString)-2);
+	$ColumnString= substr($ColumnString,0,strlen($ColumnString)-2);
+	$ConditionString= substr($ConditionString,0,strlen($ConditionString)-5);
+	return 'select ' . $ColumnString . 'from ' . $TableString . 'where ' . $ConditionString. ';' ;
+	//代码示例（单表查询）：
+	//SaeMySQLCreateSelect( "user_info" , array("id","name") , array("id"=>array("1","2")) );
+	//var_dump(SaeMySQLCreateSelect("user_info",array("id","name"),array("id"=>array("1","2"))));
+	//返回值：select `user_info`.`id` , `user_info`.`name` from `user_info` where ( `user_info`.`id` = 1 or `user_info`.`id` = 2 );
+	//代码示例（多表内连接查询）：
+	//SaeMySQLCreateSelect("user_info",array("id","name"),array("id"=>array("1","2")) , "order_info",array("id","time"),array("user_id"=>"user_info.id") );
+	//var_dump(SaeMySQLCreateSelect("user_info",array("id","name"),array("id"=>array("1","2")) , "order_info",array("id","time"),array("user_id"=>"user_info.id") ));
+	//返回值：select `user_info`.`id` , `user_info`.`name` , `order_info`.`id` , `order_info`.`time` from `user_info` , `order_info` where ( `user_info`.`id` = 1 or `user_info`.`id` = 2 ) and `order_info`.`user_id` = `user_info`.`id`;
+}
 //示例使用代码：
 /*
 SaeMySQLConnect();

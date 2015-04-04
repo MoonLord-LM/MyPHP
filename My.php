@@ -8,6 +8,7 @@ error_reporting(E_ALL);//显示所有警告和提示
 date_default_timezone_set('PRC');//中国时区
 mb_internal_encoding("UTF-8");//UTF-8编码
 ignore_user_abort(true);//完整执行
+//ob_start();//默认开启缓冲区
 
 //存取操作Session变量
 function MySessionStart(){
@@ -49,7 +50,7 @@ function MyRedirect($URL){
 	//注意：调用这些函数前不能有任何输出
 	//使用示例：MyRedirect("index.php");
 	//Chrome浏览器实测：302 Moved Temporarily
-	header('Location:'.$URL);
+	header('Location: '.$URL);
 }
 function MyRedirect301($URL){
 	header('HTTP/1.1 301 Moved Permanently');
@@ -107,7 +108,7 @@ function MyUrlEncode($data) {
 	else {
 		foreach($data as $key=>$value) {
 			$data[MyUrlEncode($key)] = MyUrlEncode($value);
-			if(MyUrlEncode($key)!==$key){
+			if((string)MyUrlEncode($key)!==(string)$key){
 				unset($data[$key]);
 			}
 		}
@@ -127,7 +128,7 @@ function MyUrlDecode($data) {
 	else {
 		foreach($data as $key=>$value) {
 			$data[MyUrlDecode($key)] = MyUrlDecode($value);
-			if(MyUrlDecode($key)!==$key){
+			if((string)MyUrlDecode($key)!==(string)$key){
 				unset($data[$key]);
 			}
 		}
@@ -588,6 +589,91 @@ function My($FunctionName,$FunctionParameterArray = array(array())){
 	//var_dump(My("MyPhpURL"));
 }
 
+//CURL操作
+function MyHttpGetBody($URL,$PostData = array(),$SetHeader = array()){
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $URL);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER,TRUE);
+	//CURLOPT_RETURNTRANSFER表示将返回的内容作为变量储存，而不是直接输出
+	if(is_array($PostData) && $PostData !==array()){
+		//使用POST方式请求
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		//发送数组参数
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $PostData);
+	}
+	if(is_array($SetHeader) && $SetHeader !==array()){
+		//设置Header信息
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $SetHeader);
+		/*
+		$header = array();
+		$header[] = 'Content-Type:application/x-www-form-urlencoded';
+		$header[] = 'Cookie:MoonLord=132357';
+		curl_setopt ($ch, CURLOPT_HTTPHEADER, $header );
+		*/
+	}
+	$BackContent = curl_exec($ch);
+	//丢包重试一次
+	if($BackContent === false){
+		$BackContent = curl_exec($ch);
+	}
+	curl_close($ch);
+	return $BackContent;
+	//示例用法：
+	//var_dump(MyHttpGetBody("http://www.baidu.com"));
+	//var_dump(MyHttpFindBody("http://moonlordapi.sinaapp.com/test.php",array("123"=>"456","我" =>"你"),array("Cookie: MoonLord=132357")));
+}
+function MyHttpFindLocation($URL,$PostData = array(),$SetHeader = array()){
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $URL);
+	curl_setopt($ch, CURLOPT_HEADER, TRUE);//获取Http-Header
+	curl_setopt($ch, CURLOPT_NOBODY, TRUE);//不获取Http-Body
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+	if(is_array($PostData) && $PostData !==array()){
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $PostData);
+	}
+	if(is_array($SetHeader) && $SetHeader !==array()){
+		//设置Header信息
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $SetHeader);
+		/*
+		$header = array();
+		$header[] = 'Content-Type:application/x-www-form-urlencoded';
+		$header[] = 'Cookie:MoonLord=132357';
+		curl_setopt ($ch, CURLOPT_HTTPHEADER, $header );
+		*/
+	}
+	$head = curl_exec($ch);
+	if($head === false){
+		$head = curl_exec($ch);
+	}
+	$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);//获取网页的状态码
+	curl_close($ch);
+	if($httpCode===301 || $httpCode===302 || $httpCode===303 || $httpCode===307){
+		//获取Http-Header的信息数组
+		$headArray=explode("\r\n",trim($head));
+		foreach ($headArray as $headItem){
+			//获取Location信息
+			if(strpos($headItem,'Location:')!==false){
+				$URL = trim(str_replace('Location:','',$headItem));
+				break;
+			}
+		}
+	}
+	return $URL;
+	//示例用法：
+	//var_dump(MyHttpFindLocation("http://www.baidu.com/s?ie=UTF-8&wd="));
+}
+function MyHttpFindBody($URL,$PostData = array(),$SetHeader = array()){
+	$Location = MyHttpFindLocation($URL,$PostData,$SetHeader);
+	while($URL!==$Location){
+		$URL = $Location;
+		$Location = MyHttpFindLocation($URL,$PostData,$SetHeader);
+	}
+	return MyHttpGetBody($URL,$PostData,$SetHeader);
+	//示例用法：
+	//var_dump(MyHttpFindBody("http://www.baidu.com/s?ie=UTF-8&wd="));
+}
+
 //返回API执行结果（执行die输出）
 function MySuccess($data='', $description='执行成功')
 {
@@ -679,9 +765,10 @@ function FinishHandler(){
 	//可以这样理解调用条件：1、当页面被用户强制停止时  2、当程序代码运行超时时  3、当PHP代码执行完成时
 	//发生了Fatal error: Call to undefined function时，ErrorHandler不被调用，但是FinishHandler会执行
 	//发生了Parse error: syntax error, unexpected end of file时，ErrorHandler不被调用，FinishHandler也不会执行
-	echo "Finish";
+	//echo "Finish";
+	header('X-Powered-By:MoonLord');
 }
-register_shutdown_function("FinishHandler");//注意：这个函数一定会在脚本结束前执行一次
+register_shutdown_function("FinishHandler");
 
 
 ?>

@@ -118,7 +118,7 @@ while(SaeMemcacheRead($i)===str_repeat('0',$i)){
 */
 //示例使用代码：
 /*
-var_dump(SaeMemcacheUnSet("abc",""));
+var_dump(SaeMemcacheUnSet("abc"));
 echo "abc:";var_dump(SaeMemcacheAppend("abc",""));
 var_dump(SaeMemcacheSet("abc",""));
 echo "abc:";var_dump(SaeMemcacheAppend("abc",""));
