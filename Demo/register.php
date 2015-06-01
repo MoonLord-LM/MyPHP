@@ -1,5 +1,5 @@
 <?php
-//示例（创建数据库表）
+//示例（用户注册）
 include('../SaeMySQL.php');
 include('../My.php');
 header('Content-Type:text/html;charset=utf-8');

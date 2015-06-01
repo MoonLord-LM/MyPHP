@@ -82,7 +82,7 @@ function SaeMemcacheAppendString($key,$appendvalue){
 	$value = $value . $appendvalue;
 	return memcache_set($mmc,$key,$value);
 }
-//自定义的Memcache值末尾追加字符串函数（成功返回true，失败或【key不存在】或【value不是JSON数组字符串】返回false）
+//自定义的Memcache值末尾追加字符串函数（成功返回true，失败或【key不存在】或【value不是数组】返回false）
 function SaeMemcacheAppendArray($key,$appendvalue){
 	//如果长度超出，则取末尾的234位
 	if(strlen($key)>234){$key=substr($key,-234);}
@@ -90,10 +90,8 @@ function SaeMemcacheAppendArray($key,$appendvalue){
 	if($mmc==false){return false;}
 	else{$value = memcache_get($mmc,$key);}
 	if($value===false){return false;}
-	$value = json_decode($value);
 	if(is_array($value)===false){return false;}
 	$value[] = $appendvalue;
-	$value = json_encode($value);
 	return memcache_set($mmc,$key,$value);
 }
 //自定义的Memcache获取服务状态函数（成功返回Memcache服务状态信息数组，失败返回false）
