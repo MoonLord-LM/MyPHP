@@ -17,6 +17,9 @@ $register_time = "'" . date("Y-m-d H:i:s",$register_stamp) . "'";
 if (SaeMySQLConnect()===false){
 	MyError("数据库连接失败");
 }
+$username = SaeMySQLCheck($username);
+$password = SaeMySQLCheck($password);
+
 $SQL="INSERT INTO `user_info` (`name`, `password`, `register_time`, `last_login_time`, `last_login_stamp`)
 VALUES ($username , $password, $register_time, $register_time, $register_stamp)
 ";

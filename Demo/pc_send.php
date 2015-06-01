@@ -4,18 +4,18 @@ include('../SaeMemcache.php');
 include('../My.php');
 header('Content-Type:text/html;charset=utf-8');
 
-if (MySetParameter("order_id")===false){
-	MyException("缺少orderid参数");
+if (MySetParameterInteger("order_id")===false){
+	MyException("缺少order_id参数");
 }
 if (MySetParameter("information")===false){
 	MyException("缺少information参数");
 }
-if (MySetParameter("user_id")===false){
+if (MySetParameterInteger("user_id")===false){
 	MyException("缺少user_id参数");
 }
 
 $stamp = time();
-$time = "'" . date("Y-m-d H:i:s",$stamp) . "'";
+$time = date("Y-m-d H:i:s",$stamp);
 $key = 'pc_to_phone【' . $user_id . '】';
 
 //写法1：
@@ -36,13 +36,13 @@ else{
 */
 
 //写法2：
-$value = array("order_id"=>$order_id,"information"=>$information,"stamp"=>$stamp,"time"=>$time);
+$value = array(array("order_id"=>$order_id,"information"=>$information,"stamp"=>$stamp,"time"=>$time));
 if(SaeMemcacheAdd($key,$value)===false){
+	$value = array("order_id"=>$order_id,"information"=>$information,"stamp"=>$stamp,"time"=>$time);
 	if(SaeMemcacheAppendArray($key,$value)===false){
 		MyError("Memcache写入失败");
 	}
 }
-
 
 MySuccess("信息发送完成");
 ?>
