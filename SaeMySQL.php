@@ -31,6 +31,27 @@ function SaeMySQLConnect(){
 	}
 	return $Connect;
 }
+//自定义的MySQL断开连接的函数（成功返回true，失败返回false）
+function SaeMySQLDisconnect(){
+	mysql_close();
+}
+//自定义的MySQL插入数据库的函数（成功返回上一步INSERT操作产生的ID，失败返回false）
+function SaeMySQLInsert($SQL){
+	$result = mysql_query($SQL);
+	//2006和2013错误则重试一次
+	if(!$result && in_array(mysql_errno(), array(2006, 2013))){
+		SaeMySQLDisconnect();
+		SaeMySQLConnect();
+		$result = mysql_query($SQL);
+	}
+	if(!$result){
+		return false;
+	}
+	if(mysql_insert_id()===0){
+		return false;
+	}
+	return mysql_insert_id();
+}
 //自定义的MySQL尝试更新/删除数据库的函数（成功或【实际影响的行数为0】返回true，失败返回false）
 function SaeMySQLTryUpdate($SQL){
 	$result = mysql_query($SQL);
@@ -46,6 +67,12 @@ function SaeMySQLTryUpdate($SQL){
 	return $result;
 }
 function SaeMySQLTryDelete($SQL){
+	return SaeMySQLTryUpdate($SQL);
+}
+function SaeMySQLCreateTable($SQL){
+	return SaeMySQLTryUpdate($SQL);
+}
+function SaeMySQLDropTable($SQL){
 	return SaeMySQLTryUpdate($SQL);
 }
 //自定义的MySQL强制更新数据库的函数（成功返回true，失败或【实际影响的行数为0】返回false）
@@ -70,23 +97,6 @@ function SaeMySQLMustUpdate($SQL){
 }
 function SaeMySQLMustDelete($SQL){
 	return SaeMySQLMustUpdate($SQL);
-}
-//自定义的MySQL插入数据库的函数（成功返回上一步INSERT操作产生的ID，失败返回false）
-function SaeMySQLInsert($SQL){
-	$result = mysql_query($SQL);
-	//2006和2013错误则重试一次
-	if(!$result && in_array(mysql_errno(), array(2006, 2013))){
-		SaeMySQLDisconnect();
-		SaeMySQLConnect();
-		$result = mysql_query($SQL);
-	}
-	if(!$result){
-		return false;
-	}
-	if(mysql_insert_id()===0){
-		return false;
-	}
-	return mysql_insert_id();
 }
 //自定义的MySQL读取数据库的函数（成功返回数据的关联和默认下标数组，失败返回false）
 function SaeMySQLSelectArray($SQL){
@@ -226,10 +236,6 @@ function SaeMySQLSelectDefaultCell($SQL){
 function SaeMySQLSelectAssociativeCell($SQL){
 	return SaeMySQLSelectCell($SQL);
 }
-//自定义的MySQL断开连接的函数（成功返回true，失败返回false）
-function SaeMySQLDisconnect(){
-	mysql_close();
-}
 //SQL结果集解析的函数（成功返回数据的关联和默认下标数组，失败返回false）
 function SaeMySQLFetchAllArray($result){
 	$data  = array();
@@ -304,7 +310,7 @@ function SaeMySQLCheck(&$value)
 	//$sql = "SELECT * FROM users WHERE user = $user AND password = $pwd";
 }
 //自定义的生成Select内连接查询的SQL语句的函数
-function SaeMySQLCreateSelect(){
+function SaeMySQLCreateSelect($Table,$Column,$Condition){
 	$num_args=func_num_args();
 	if($num_args === 0 || $num_args % 3 !== 0){
 		return false;

@@ -8,7 +8,7 @@ error_reporting(E_ALL);//显示所有警告和提示
 date_default_timezone_set('PRC');//中国时区
 mb_internal_encoding("UTF-8");//UTF-8编码
 ignore_user_abort(true);//完整执行
-//ob_start();//默认开启缓冲区
+ob_start();//默认开启缓冲区
 
 //存取操作Session变量
 function MySessionStart(){
@@ -153,12 +153,14 @@ function MyPhpURL()
 //当前被访问的PHP的文件名称（含后缀）
 function MyPhpFullName()
 {
-	return basename( __FILE__ );
+	//return basename( __FILE__ );//返回My.php
+	return basename( $_SERVER['REQUEST_URI'] );
 }
 //当前被访问的PHP的文件名称（不含后缀）
 function MyPhpName()
 {
-	return basename( __FILE__ , '.php');
+	//return basename( __FILE__ , '.php');//返回My
+	return basename( $_SERVER['REQUEST_URI'] , '.php' );
 }
 
 //将指定的值赋值为全局变量
@@ -170,7 +172,7 @@ function MySetValue($Name,$Value)
 	//等效于在全局非函数的区域写了一句：
 	//${$Name} = $Value;
 }
-//将HTTP（POST）参数赋值为全局变量
+//将HTTP（POST）参数赋值为全局变量（参数不存在或格式错误则返回Flase）
 function MySetPost($ParameterName, $Length=0)
 {
 	if($Length==0){
@@ -299,7 +301,7 @@ function MySetPostAlphaNumeric($ParameterName, $MinLength=0, $MaxLength=0)
 	}
 	return false;
 }
-//将HTTP（GET）参数赋值为全局变量
+//将HTTP（GET）参数赋值为全局变量（参数不存在或格式错误则返回Flase）
 function MySetGet($ParameterName, $Length=0)
 {
 	if($Length==0){
@@ -428,7 +430,7 @@ function MySetGetAlphaNumeric($ParameterName, $MinLength=0, $MaxLength=0)
 	}
 	return false;
 }
-//将HTTP（无视POST/GET）参数赋值为全局变量
+//将HTTP（无视POST/GET）参数赋值为全局变量（参数不存在或格式错误则返回Flase）
 function MySetParameter($ParameterName, $Length=0)
 {
 	if (MySetPost($ParameterName, $Length)===false){
@@ -646,6 +648,7 @@ function MyHttpFindLocation($URL,$PostData = array(),$SetHeader = array()){
 	if($head === false){
 		$head = curl_exec($ch);
 	}
+	var_dump($head);
 	$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);//获取网页的状态码
 	curl_close($ch);
 	if($httpCode===301 || $httpCode===302 || $httpCode===303 || $httpCode===307){
@@ -678,21 +681,21 @@ function MyHttpFindBody($URL,$PostData = array(),$SetHeader = array()){
 function MySuccess($data='', $description='执行成功')
 {
 	MySuccessReport($data, $description);
-	$result = array("result"=>"success","data"=>(string)$data,"description"=>(string)$description);
+	$result = array("result"=>"success","data"=>$data,"description"=>(string)$description);
 	//$result = json_encode($result);
 	$result = MyJsonEncode($result);
 	die($result);
 }
 function MyException($type='', $description='执行异常'){
 	MyExceptionReport($type, $description);
-	$result = array("result"=>"exception","type"=>(string)$type,"description"=>(string)$description);
+	$result = array("result"=>"exception","type"=>$type,"description"=>(string)$description);
 	//$result = json_encode($result);
 	$result = MyJsonEncode($result);
 	die($result);
 }
 function MyError($type='', $description='执行失败'){
 	MyErrorReport($type, $description);
-	$result = array("result"=>"error","type"=>(string)$type,"description"=>(string)$description);
+	$result = array("result"=>"error","type"=>$type,"description"=>(string)$description);
 	//$result = json_encode($result);
 	$result = MyJsonEncode($result);
 	die($result);
