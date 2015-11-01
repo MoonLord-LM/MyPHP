@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 //示例（创建数据库表）
-include('../SaeMySQL.php');
+include('../SAE/SaeMySQL.php');
 header('Content-Type:text/html;charset=utf-8');
 
 if (SaeMySQLConnect()) {

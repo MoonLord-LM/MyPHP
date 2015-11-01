@@ -1,6 +1,7 @@
 <?php
 //MyPHP 后台API开发的开源函数库
 //作者：MoonLord
+//2015.11.1
 
 //基本设置：
 error_reporting(E_ALL);//显示所有警告和提示
@@ -71,10 +72,16 @@ function MyRedirect307($URL){
 
 //Base64（用于URL的改进）编码
 function MyBase64Encode($data) { 
+	return strtr(base64_encode($data), '+/', '-_'); 
+}
+function MyBase64EncodeWithoutEqual($data) { 
 	return rtrim(strtr(base64_encode($data), '+/', '-_'), '='); 
 }
 //Base64（用于URL的改进）解码
 function MyBase64Decode($data) {
+	return base64_decode(strtr($data, '-_', '+/')); 
+}
+function MyBase64DecodeWithoutEqual($data) {
 	return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT)); 
 }
 //数组转换保留为中文的JSON字符串
@@ -136,12 +143,12 @@ function MyUrlDecode($data) {
 	return $data;
 }
 
-//当前被访问的PHP的完整URL
+//当前被访问的PHP的完整URL（包含URL中的参数）
 function MyCompleteURL()
 {
 	return $_SERVER['HTTP_HOST'] . ':' . $_SERVER['SERVER_PORT'] . $_SERVER['REQUEST_URI'];
 }
-//当前被访问的PHP的文件URL
+//当前被访问的PHP的文件URL（不包含URL中的参数）
 function MyPhpURL()
 {
 	//strpos()函数返回字符串在另一个字符串中第一次出现的位置，如果没有找到该字符串，则返回false。

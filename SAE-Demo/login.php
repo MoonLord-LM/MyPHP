@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 //示例（用户登录）
-include('../SaeMySQL.php');
+include('../SAE/SaeMySQL.php');
 include('../My.php');
 header('Content-Type:text/html;charset=utf-8');
 

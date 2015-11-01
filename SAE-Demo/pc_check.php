@@ -1,6 +1,7 @@
-<?php
+﻿<?php
 //示例（PC获取消息）
-include('../SaeMySQL.php');
+include('../SAE/SaeMySQL.php');
+include('../SAE/SaeMemcache.php');
 include('../My.php');
 header('Content-Type:text/html;charset=utf-8');
 
