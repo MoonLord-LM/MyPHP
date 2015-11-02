@@ -40,6 +40,13 @@ function MySQLConnect(){
 function MySQLDisconnect(){
 	return mysql_close();
 }
+//自定义的MySQL错误信息函数
+function MySQLErrorInfo(){
+	return '错误代码：'.mysql_errno().' 错误原因：'.mysql_error();
+}
+function MySQLErrorNumber(){
+	return mysql_errno();
+}
 //自定义的MySQL插入数据库的函数（成功返回上一步INSERT操作产生的ID，失败返回false）
 function MySQLInsert($SQL){
 	$result = mysql_query($SQL);

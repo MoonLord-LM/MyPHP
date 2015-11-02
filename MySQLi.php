@@ -16,7 +16,7 @@ $MySQL_Database = 'MoonLord';
 //单元格的值如果为NULL，在返回结果中，将被转换为空字符串""
 //单元格的值如果为JSON字符串，在返回结果中，将被转换为JSON数组
 
-//die("【数据库连接错误】<br/>错误代码：".mysqli_errno()."<br/>错误原因: ".mysqli_error());
+//die("【数据库连接错误】<br/>错误代码：".mysqli_errno($Connect)."<br/>错误原因: ".mysqli_error());
 
 $Connect = null;
 //自定义的MySQL新建连接的函数（成功返回数据库连接标识，失败返回false）
@@ -38,12 +38,21 @@ function MySQLDisconnect(){
 	global $Connect;
 	return mysqli_close($Connect);
 }
+//自定义的MySQL错误信息函数
+function MySQLErrorInfo(){
+	global $Connect;
+	return '错误代码：'.mysqli_errno($Connect).' 错误原因：'.mysqli_error($Connect);
+}
+function MySQLErrorNumber(){
+	global $Connect;
+	return mysqli_errno($Connect);
+}
 //自定义的MySQL插入数据库的函数（成功返回上一步INSERT操作产生的ID，失败返回false）
 function MySQLInsert($SQL){
 	global $Connect;
 	$result = mysqli_query($Connect,$SQL);
 	//2006和2013错误则重试一次
-	if(!$result && in_array(mysqli_errno(), array(2006, 2013))){
+	if(!$result && in_array(mysqli_errno($Connect), array(2006, 2013))){
 		MySQLDisconnect();
 		MySQLConnect();
 		$result = mysqli_query($Connect,$SQL);
@@ -61,7 +70,7 @@ function MySQLTryUpdate($SQL){
 	global $Connect;
 	$result = mysqli_query($Connect,$SQL);
 	//2006和2013错误则重试一次
-	if(!$result && in_array(mysqli_errno(), array(2006, 2013))){
+	if(!$result && in_array(mysqli_errno($Connect), array(2006, 2013))){
 		MySQLDisconnect();
 		MySQLConnect();
 		$result = mysqli_query($Connect,$SQL);
@@ -88,7 +97,7 @@ function MySQLMustUpdate($SQL){
 	//mysqli_query返回非false的值，不说明任何有关影响到的或返回的行数，很有可能一条查询执行成功了但并未影响到或并未返回任何行
 	$result = mysqli_query($Connect,$SQL);
 	//2006和2013错误则重试一次
-	if(!$result && in_array(mysqli_errno(), array(2006, 2013))){
+	if(!$result && in_array(mysqli_errno($Connect), array(2006, 2013))){
 		MySQLDisconnect();
 		MySQLConnect();
 		$result = mysqli_query($Connect,$SQL);
@@ -109,7 +118,7 @@ function MySQLSelectArray($SQL){
 	global $Connect;
 	$result = mysqli_query($Connect,$SQL);
 	//2006和2013错误则重试一次
-	if(!$result && in_array(mysqli_errno(), array(2006, 2013))){
+	if(!$result && in_array(mysqli_errno($Connect), array(2006, 2013))){
 		MySQLDisconnect();
 		MySQLConnect();
 		$result = mysqli_query($Connect,$SQL);
@@ -131,7 +140,7 @@ function MySQLSelectDefaultArray($SQL){
 	global $Connect;
 	$result = mysqli_query($Connect,$SQL);
 	//2006和2013错误则重试一次
-	if(!$result && in_array(mysqli_errno(), array(2006, 2013))){
+	if(!$result && in_array(mysqli_errno($Connect), array(2006, 2013))){
 		MySQLDisconnect();
 		MySQLConnect();
 		$result = mysqli_query($Connect,$SQL);
@@ -153,7 +162,7 @@ function MySQLSelectAssociativeArray($SQL){
 	global $Connect;
 	$result = mysqli_query($Connect,$SQL);
 	//2006和2013错误则重试一次
-	if(!$result && in_array(mysqli_errno(), array(2006, 2013))){
+	if(!$result && in_array(mysqli_errno($Connect), array(2006, 2013))){
 		MySQLDisconnect();
 		MySQLConnect();
 		$result = mysqli_query($Connect,$SQL);
@@ -175,7 +184,7 @@ function MySQLSelectRow($SQL){
 	global $Connect;
 	$result = mysqli_query($Connect,$SQL);
 	//2006和2013错误则重试一次
-	if(!$result && in_array(mysqli_errno(), array(2006, 2013))){
+	if(!$result && in_array(mysqli_errno($Connect), array(2006, 2013))){
 		MySQLDisconnect();
 		MySQLConnect();
 		$result = mysqli_query($Connect,$SQL);
@@ -193,7 +202,7 @@ function MySQLSelectDefaultRow($SQL){
 	global $Connect;
 	$result = mysqli_query($Connect,$SQL);
 	//2006和2013错误则重试一次
-	if(!$result && in_array(mysqli_errno(), array(2006, 2013))){
+	if(!$result && in_array(mysqli_errno($Connect), array(2006, 2013))){
 		MySQLDisconnect();
 		MySQLConnect();
 		$result = mysqli_query($Connect,$SQL);
@@ -211,7 +220,7 @@ function MySQLSelectAssociativeRow($SQL){
 	global $Connect;
 	$result = mysqli_query($Connect,$SQL);
 	//2006和2013错误则重试一次
-	if(!$result && in_array(mysqli_errno(), array(2006, 2013))){
+	if(!$result && in_array(mysqli_errno($Connect), array(2006, 2013))){
 		MySQLDisconnect();
 		MySQLConnect();
 		$result = mysqli_query($Connect,$SQL);
@@ -229,7 +238,7 @@ function MySQLSelectCell($SQL){
 	global $Connect;
 	$result = mysqli_query($Connect,$SQL);
 	//2006和2013错误则重试一次
-	if(!$result && in_array(mysqli_errno(), array(2006, 2013))){
+	if(!$result && in_array(mysqli_errno($Connect), array(2006, 2013))){
 		MySQLDisconnect();
 		MySQLConnect();
 		$result = mysqli_query($Connect,$SQL);
