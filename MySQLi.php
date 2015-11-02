@@ -16,7 +16,7 @@ $MySQL_Database = 'MoonLord';
 //单元格的值如果为NULL，在返回结果中，将被转换为空字符串""
 //单元格的值如果为JSON字符串，在返回结果中，将被转换为JSON数组
 
-//die("【数据库连接错误】<br/>错误代码：".mysqli_errno($Connect)."<br/>错误原因: ".mysqli_error());
+//die("【数据库连接错误】<br/>错误代码：".mysqli_errno($Connect)."<br/>错误原因: ".mysqli_error($Connect));
 
 $Connect = null;
 //自定义的MySQL新建连接的函数（成功返回数据库连接标识，失败返回false）
