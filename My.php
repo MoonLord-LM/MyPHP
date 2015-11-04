@@ -47,27 +47,34 @@ function MySessionClear(){
 }
 
 //网页跳转
-function MyRedirect($URL){
+function MyRedirect($URL, $DelaySecond=0){
 	//注意：调用这些函数前不能有任何输出
 	//使用示例：MyRedirect("index.php");
 	//Chrome浏览器实测：302 Moved Temporarily
-	header('Location: '.$URL);
+	if ($DelaySecond===0)
+	{
+		header('Location: '.$URL);
+	}
+	else
+	{
+		header('Refresh:'.$DelaySecond.';url='.$URL);
+	}	
 }
-function MyRedirect301($URL){
+function MyRedirect301($URL, $DelaySecond=0){
 	header('HTTP/1.1 301 Moved Permanently');
-	MyRedirect($URL);
+	MyRedirect($URL, $DelaySecond);
 }
-function MyRedirect302($URL){
+function MyRedirect302($URL, $DelaySecond=0){
 	header('HTTP/1.1 302 Found');
-	MyRedirect($URL);
+	MyRedirect($URL, $DelaySecond);
 }
-function MyRedirect303($URL){
+function MyRedirect303($URL, $DelaySecond=0){
 	header('HTTP/1.1 303 See Other');
-	MyRedirect($URL);
+	MyRedirect($URL, $DelaySecond);
 }
-function MyRedirect307($URL){
+function MyRedirect307($URL, $DelaySecond=0){
 	header('HTTP/1.1 307 Temporary Redirect');
-	MyRedirect($URL);
+	MyRedirect($URL, $DelaySecond);
 }
 
 //Base64（用于URL的改进）编码
