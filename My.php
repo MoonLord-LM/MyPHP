@@ -1,7 +1,7 @@
 <?php
 //MyPHP 后台API开发的开源函数库
 //作者：MoonLord
-//2015.11.1
+//2015.11.14
 
 //基本设置：
 error_reporting(E_ALL);//显示所有警告和提示
@@ -26,6 +26,9 @@ function MySessionSet($key,$value){
 }
 function MySessionGet($key){
 	MySessionStart();
+	if(!isset($_SESSION[$key])){
+		return false;
+	}
 	return $_SESSION[$key];
 }
 function MySessionHave($key){

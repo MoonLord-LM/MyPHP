@@ -1,7 +1,7 @@
 <?php
 //MySQL基本操作（基于 PHP 的 MySQLi 扩展）
 //作者：MoonLord
-//2015.11.1
+//2015.11.14
 
 $MySQL_Server = 'localhost';
 $MySQL_Port = '3306';
@@ -60,10 +60,10 @@ function MySQLInsert($SQL){
 	if(!$result){
 		return false;
 	}
-	if(mysqli_insert_id()===0){
+	if(mysqli_insert_id($Connect)===0){
 		return false;
 	}
-	return mysqli_insert_id();
+	return mysqli_insert_id($Connect);
 }
 //自定义的MySQL尝试更新/删除数据库的函数（成功或【实际影响的行数为0】返回true，失败返回false）
 function MySQLTryUpdate($SQL){
@@ -315,6 +315,7 @@ function ResultTransform(&$Array){
 //自定义的SQL防止注入检查的函数
 function MySQLCheck(&$value)
 {
+	global $Connect;
 	//去除斜杠(服务器配置给予的转义斜杠)
 	if (get_magic_quotes_gpc())
 	{
@@ -323,7 +324,7 @@ function MySQLCheck(&$value)
 	//如果不是数字则加引号（专业的转义函数）
 	if (!is_numeric($value))
 	{
-		$value = "'" . mysqli_real_escape_string($value) . "'";
+		$value = "'" . mysqli_real_escape_string($Connect,$value) . "'";
 	}
 	return $value;
 	//示例用法：
