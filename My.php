@@ -1,13 +1,13 @@
 <?php
 //MyPHP 后台API开发的开源函数库
 //作者：MoonLord
-//2015.11.14
+//2015.11.18
 
 //基本设置：
 error_reporting(E_ALL);//显示所有警告和提示
 //error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);//抑制警告和提示
 date_default_timezone_set('PRC');//中国时区
-mb_internal_encoding("UTF-8");//UTF-8编码
+mb_internal_encoding('UTF-8');//UTF-8编码
 ignore_user_abort(true);//完整执行
 ob_start();//默认开启缓冲区
 
@@ -49,35 +49,32 @@ function MySessionClear(){
 	return true;
 }
 
-//网页跳转
-function MyRedirect($URL, $DelaySecond=0){
-	//注意：调用这些函数前不能有任何输出
+//网页跳转（调用这些函数前不能有任何输出）
+function MyRedirect($URL){
 	//使用示例：MyRedirect("index.php");
 	//Chrome浏览器实测：302 Moved Temporarily
-	if ($DelaySecond===0)
-	{
-		header('Location: '.$URL);
-	}
-	else
-	{
-		header('Refresh:'.$DelaySecond.';url='.$URL);
-	}	
+	header('Location: '.$URL);
 }
-function MyRedirect301($URL, $DelaySecond=0){
+function MyRedirect301($URL){
 	header('HTTP/1.1 301 Moved Permanently');
-	MyRedirect($URL, $DelaySecond);
+	MyRedirect($URL);
 }
-function MyRedirect302($URL, $DelaySecond=0){
+function MyRedirect302($URL){
 	header('HTTP/1.1 302 Found');
-	MyRedirect($URL, $DelaySecond);
+	MyRedirect($URL);
 }
-function MyRedirect303($URL, $DelaySecond=0){
+function MyRedirect303($URL){
 	header('HTTP/1.1 303 See Other');
-	MyRedirect($URL, $DelaySecond);
+	MyRedirect($URL);
 }
-function MyRedirect307($URL, $DelaySecond=0){
+function MyRedirect307($URL){
 	header('HTTP/1.1 307 Temporary Redirect');
-	MyRedirect($URL, $DelaySecond);
+	MyRedirect($URL);
+}
+
+//网页延时刷新（可以有数据输出）
+function MyRefresh($URL, $DelaySecond=0){
+	header('Refresh:'.$DelaySecond.';url='.$URL);
 }
 
 //Base64（用于URL的改进）编码
@@ -764,7 +761,7 @@ function ErrorHandler($errno , $errstr , $errfile ,$errline , $errcontext){
 	//可以处理：E_USER_ERROR、E_USER_WARNING、E_USER_NOTICE
 	//Notice: Undefined variable
 }
-set_error_handler("ErrorHandler",E_ALL);
+set_error_handler('ErrorHandler',E_ALL);
 function ExceptionHandler($exception){
 	//var_dump($exception);
 	//echo "code：";var_dump($exception->getCode());
@@ -778,7 +775,7 @@ function ExceptionHandler($exception){
 	//注意：
 	//在这个异常处理程序被调用后，脚本会停止执行	
 }
-set_exception_handler("ExceptionHandler");
+set_exception_handler('ExceptionHandler');
 function FinishHandler(){
 	//注意：
 	//register_shutdown_function是指在执行完所有PHP语句后再调用函数，不要理解成客户端关闭流浏览器页面时调用函数
@@ -788,7 +785,5 @@ function FinishHandler(){
 	//echo "Finish";
 	header('X-Powered-By:MoonLord');
 }
-register_shutdown_function("FinishHandler");
-
-
+register_shutdown_function('FinishHandler');
 ?>
