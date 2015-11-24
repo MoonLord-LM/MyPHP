@@ -695,21 +695,21 @@ function MyHttpFindBody($URL,$PostData = array(),$SetHeader = array()){
 function MySuccess($data='', $description='执行成功')
 {
 	MySuccessReport($data, $description);
-	$result = array("result"=>"success","data"=>$data,"description"=>(string)$description);
+	$result = array('result'=>'success','data'=>$data,'description'=>(string)$description);
 	//$result = json_encode($result);
 	$result = MyJsonEncode($result);
 	die($result);
 }
 function MyException($type='', $description='执行异常'){
 	MyExceptionReport($type, $description);
-	$result = array("result"=>"exception","type"=>$type,"description"=>(string)$description);
+	$result = array('result'=>'exception','type'=>$type,'description'=>(string)$description);
 	//$result = json_encode($result);
 	$result = MyJsonEncode($result);
 	die($result);
 }
 function MyError($type='', $description='执行失败'){
 	MyErrorReport($type, $description);
-	$result = array("result"=>"error","type"=>$type,"description"=>(string)$description);
+	$result = array('result'=>'error','type'=>$type,'description'=>(string)$description);
 	//$result = json_encode($result);
 	$result = MyJsonEncode($result);
 	die($result);
@@ -719,8 +719,8 @@ function MySuccessReport($data='', $description='执行成功')
 {
 	$debug_backtrace = debug_backtrace();
 	$count = count($debug_backtrace);
-	if($debug_backtrace[0]["function"]==="MySuccessReport"){unset($debug_backtrace[0]);}
-	if($debug_backtrace[1]["function"]==="MySuccess"){unset($debug_backtrace[1]);}
+	if($debug_backtrace[0]['function']==='MySuccessReport'){unset($debug_backtrace[0]);}
+	if($debug_backtrace[1]['function']==='MySuccess'){unset($debug_backtrace[1]);}
 	//var_dump($debug_backtrace);
 	//待完成
 }
@@ -728,8 +728,8 @@ function MyExceptionReport($type='', $description='执行异常')
 {
 	$debug_backtrace = debug_backtrace();
 	$count = count($debug_backtrace);
-	if($debug_backtrace[0]["function"]==="MyExceptionReport"){unset($debug_backtrace[0]);}
-	if($debug_backtrace[1]["function"]==="MyException"){unset($debug_backtrace[1]);}
+	if($debug_backtrace[0]['function']==='MyExceptionReport'){unset($debug_backtrace[0]);}
+	if($debug_backtrace[1]['function']==='MyException'){unset($debug_backtrace[1]);}
 	//var_dump($debug_backtrace);
 	//待完成
 }
@@ -737,22 +737,22 @@ function MyErrorReport($type='', $description='执行失败')
 {
 	$debug_backtrace = debug_backtrace();
 	$count = count($debug_backtrace);
-	if($debug_backtrace[0]["function"]==="MyErrorReport"){unset($debug_backtrace[0]);}
-	if($debug_backtrace[1]["function"]==="MyError"){unset($debug_backtrace[1]);}
+	if($debug_backtrace[0]['function']==='MyErrorReport'){unset($debug_backtrace[0]);}
+	if($debug_backtrace[1]['function']==='MyError'){unset($debug_backtrace[1]);}
 	//var_dump($debug_backtrace);
 	//待完成
 }
 
 //全局的错误、异常处理和脚本结束前的处理
 function ErrorHandler($errno , $errstr , $errfile ,$errline , $errcontext){
-	//echo "errno：";var_dump($errno);
-	//echo "errstr：";var_dump($errstr);
-	//echo "errfile：";var_dump($errfile);
-	//echo "errline：";var_dump($errline);
-	//echo "errcontext：";var_dump($errcontext);
-	MyError('全局错误捕捉',$errfile."[行号".$errline."]".$errstr);
+	//echo 'errno：';var_dump($errno);
+	//echo 'errstr：';var_dump($errstr);
+	//echo 'errfile：';var_dump($errfile);
+	//echo 'errline：';var_dump($errline);
+	//echo 'errcontext：';var_dump($errcontext);
+	MyError('全局错误捕捉',$errfile.'[行号'.$errline.']'.$errstr);
 	//示例：
-	//（手动创建错误）trigger_error("Uncaught Error",E_USER_WARNING);
+	//（手动创建错误）trigger_error('Uncaught Error',E_USER_WARNING);
 	//注意：
 	//无法处理：E_ERROR、E_PARSE、E_CORE_ERROR、E_CORE_WARNING、 E_COMPILE_ERROR、E_COMPILE_WARNING
 	//无法处理：Parse error（解析错误）或Fatal error（致命错误）等
@@ -764,12 +764,12 @@ function ErrorHandler($errno , $errstr , $errfile ,$errline , $errcontext){
 set_error_handler('ErrorHandler',E_ALL);
 function ExceptionHandler($exception){
 	//var_dump($exception);
-	//echo "code：";var_dump($exception->getCode());
-	//echo "message：";var_dump($exception->getMessage());
-	//echo "file：";var_dump($exception->getFile());
-	//echo "line：";var_dump($exception->getLine());
-	//echo "trace：";var_dump($exception->getTrace());
-	MyError('全局异常捕捉',$exception->getFile()."[行号".$exception->getLine()."]".$exception->getMessage());
+	//echo 'code：';var_dump($exception->getCode());
+	//echo 'message：';var_dump($exception->getMessage());
+	//echo 'file：';var_dump($exception->getFile());
+	//echo 'line：';var_dump($exception->getLine());
+	//echo 'trace：';var_dump($exception->getTrace());
+	MyError('全局异常捕捉',$exception->getFile().'[行号'.$exception->getLine().']'.$exception->getMessage());
 	//示例：
 	//（手动创建异常）throw new Exception('Uncaught Exception');
 	//注意：
@@ -782,7 +782,7 @@ function FinishHandler(){
 	//可以这样理解调用条件：1、当页面被用户强制停止时  2、当程序代码运行超时时  3、当PHP代码执行完成时
 	//发生了Fatal error: Call to undefined function时，ErrorHandler不被调用，但是FinishHandler会执行
 	//发生了Parse error: syntax error, unexpected end of file时，ErrorHandler不被调用，FinishHandler也不会执行
-	//echo "Finish";
+	//echo 'Finish';
 	header('X-Powered-By:MoonLord');
 }
 register_shutdown_function('FinishHandler');
