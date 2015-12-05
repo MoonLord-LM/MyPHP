@@ -46,6 +46,10 @@ function MyResult($code='', $data='', $tips='', $description ='')
 	$result = MyJsonEncode($result);
 	die($result);
 }
+function MySuccess($data='', $tips='')
+{
+	MyResult(0,$data,$tips);
+}
 //输出结果（使用die输出JSONP回调结果）
 function MyJsonpResult($code='', $data='', $tips='', $description ='',$callback='')
 {
