@@ -1,7 +1,7 @@
 <?php
 //MySQL基本操作（基于 PHP 的 MySQLi 扩展）
-//作者：MoonLord
-//2015.11.14
+//Author：MoonLord
+//Version：2015.12.05
 
 $MySQL_Server = 'localhost';
 $MySQL_Port = '3306';

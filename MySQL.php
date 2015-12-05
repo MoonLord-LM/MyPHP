@@ -1,7 +1,7 @@
 <?php
 //MySQL基本操作（基于 PHP 的 MySQL 扩展）
-//作者：MoonLord
-//2015.11.1
+//Author：MoonLord
+//Version：2015.12.05
 
 //注意：MySQL扩展自PHP 5.5.0起已废弃，并在将来会被移除。应使用 MySQLi 或 PDO_MySQL 扩展来替换之。
 
