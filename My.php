@@ -503,7 +503,7 @@ function MyCheckDigit($ParameterName, $MinLength=1, $MaxLength=PHP_INT_MAX)
 {
 	global ${$ParameterName};
 	$Parameter = ${$ParameterName};
-	if (isset($Parameter) && ctype_digit($ParameterName) && strlen($Parameter) >= $MinLength && strlen($Parameter) <= $MaxLength){
+	if (isset($Parameter) && ctype_digit($Parameter) && strlen($Parameter) >= $MinLength && strlen($Parameter) <= $MaxLength){
 		return;
 	}
 	MyResult('1031', $data='', $tips='参数'.$ParameterName.'的值格式错误', $description ='参数'.$ParameterName.'的值应为字符个数不小于'.$MinLength.'，不大于'.$MaxLength.'的纯数字组成的字符串，请求传递的'.$ParameterName.'参数的值为'.$Parameter);
@@ -513,7 +513,7 @@ function MyCheckAlphaNumeric($ParameterName, $MinLength=1, $MaxLength=PHP_INT_MA
 {
 	global ${$ParameterName};
 	$Parameter = ${$ParameterName};
-	if (isset($Parameter) && ctype_alnum($ParameterName) && strlen($Parameter) >= $MinLength && strlen($Parameter) <= $MaxLength){
+	if (isset($Parameter) && ctype_alnum($Parameter) && strlen($Parameter) >= $MinLength && strlen($Parameter) <= $MaxLength){
 		return;
 	}
 	MyResult('1032', $data='', $tips='参数'.$ParameterName.'的值格式错误', $description ='参数'.$ParameterName.'的值应为字符个数不小于'.$MinLength.'，不大于'.$MaxLength.'的数字和字母组成的字符串，请求传递的'.$ParameterName.'参数的值为'.$Parameter);
@@ -545,7 +545,7 @@ function MyCheckBoolean($ParameterName)
 {
 	global ${$ParameterName};
 	$Parameter = ${$ParameterName};
-	if (isset($Parameter) && (strtolower($ParameterName) === 'true' || strtolower($ParameterName) === 'false')){
+	if (isset($Parameter) && (strtolower($Parameter) === 'true' || strtolower($Parameter) === 'false')){
 		${$ParameterName} = (bool)$Parameter;
 		return;
 	}
@@ -556,7 +556,7 @@ function MyCheckTinyInt($ParameterName)
 {
 	global ${$ParameterName};
 	$Parameter = ${$ParameterName};
-	if (isset($Parameter) && (strtolower($ParameterName) === '0' || strtolower($ParameterName) === '1')){
+	if (isset($Parameter) && (strtolower($Parameter) === '0' || strtolower($Parameter) === '1')){
 		${$ParameterName} = (int)$Parameter;
 		return;
 	}
