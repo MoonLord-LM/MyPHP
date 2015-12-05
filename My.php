@@ -46,10 +46,6 @@ function MyResult($code='', $data='', $tips='', $description ='')
 	$result = MyJsonEncode($result);
 	die($result);
 }
-function MySuccess($data='', $tips='')
-{
-	MyResult(0,$data,$tips);
-}
 //输出结果（使用die输出JSONP回调结果）
 function MyJsonpResult($code='', $data='', $tips='', $description ='',$callback='')
 {
@@ -328,6 +324,10 @@ function MyClientIP()
 	return $IP[0];
 }
 $MyClientIP = MyClientIP();
+//当前时间（'Y-m-d H:i:s'格式，用于存入MySQL的datetime类型）
+function MyDateTime(){
+	return '\'' . date('Y-m-d H:i:s',time()) . '\'';
+}
 
 //Session操作（与$MyClientIP信息绑定）
 function MySessionStart(){
