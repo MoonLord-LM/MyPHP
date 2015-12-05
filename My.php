@@ -321,6 +321,7 @@ function MyClientIP()
 	else {
 		$IP[0] = 'Unknown';   
 	}
+	header('Request-IP:'.$IP[0]);
 	return $IP[0];
 }
 $MyClientIP = MyClientIP();
