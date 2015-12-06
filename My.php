@@ -327,8 +327,11 @@ function MySessionStart(){
 		//PHP 5.2.0	才加入session_set_cookie_params的第5个参数以及setcookie的第7个参数，httponly
 		//之前版本可以使用header("Set-Cookie: key=value; httponly");达到类似效果
 		session_set_cookie_params(0, null, null, null, true);
-		if(session_start()===false){
-			MyResult('2051','','后端代码执行失败',__FILE__.'[行号'.__LINE__.']'.'session_start()执行失败，返回值为false');
+		session_start();
+		var_dump(session_save_path());
+		if(session_save_path()===''){
+			MySessionClear();
+			MyResult('2051','','后端代码执行失败',__FILE__.'[行号'.__LINE__.']'.'session_save_path()返回值为空字符串');
 		}
 		//setcookie(session_name(),session_id(),time()+1800,null, null, null, true);
 	}
