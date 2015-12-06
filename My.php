@@ -328,8 +328,7 @@ function MySessionStart(){
 		//之前版本可以使用header("Set-Cookie: key=value; httponly");达到类似效果
 		session_set_cookie_params(0, null, null, null, true);
 		session_start();
-		var_dump(session_save_path());
-		if(session_save_path()===''){
+		if(session_save_path()===''){//用于拦截Notice消息：Unknown[行号0]Unknown: Failed to write session data (files). Please verify that the current setting of session.save_path is correct ()
 			MySessionClear();
 			MyResult('2051','','后端代码执行失败',__FILE__.'[行号'.__LINE__.']'.'session_save_path()返回值为空字符串');
 		}
