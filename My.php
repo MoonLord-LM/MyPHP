@@ -2,7 +2,7 @@
 //MyPHP
 //后端API开发的开源框架
 //Author：MoonLord
-//Version：2015.12.05
+//Version：2015.12.07
 
 //返回值示例：
 //{"code":"1029","data":"","tips":"参数username的值格式错误","description":"参数username的值应为字符个数不小于1，不大于100的纯中文字符串，请求传递的username参数的值为111"}
@@ -14,7 +14,7 @@
 //description：详细信息（用于测试和Debug使用，不建议展示给用户）
 //注意：
 //以1024，2048为错误码分界线
-//本文件内部已占用的错误码为1025-1039（前端参数错误）、1100-1102（安全性错误）、2049-2051（后端代码错误）
+//本文件内部已占用的错误码为1025-1039（前端参数错误）、1100-1102（安全性错误）、2049-2052（后端代码错误）
 
 //基本设置：
 error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);//运行模式（抑制警告和提示信息，只显示错误信息）
@@ -27,11 +27,13 @@ header('Content-Type: text/html;charset=utf-8');//输出字符编码头（UTF-8�
 header('Content-Security-Policy: default-src \'self\';img-src *;media-src *;font-src *;script-src \'self\' \'unsafe-inline\' http://*.bdimg.com;style-src \'self\' \'unsafe-inline\' http://*.bdimg.com;');//只允许任意来源的图片、视频、字体，来自百度前端CDN的脚本和样式，不允许其它第三方资源嵌入网页
 $AllowRefererDomain = array(null,'127.0.0.1','www.moonlord.cn',$_SERVER["SERVER_NAME"]);//允许的Referer值的域名（包含null表示允许没有Referer值的请求）
 $AllowAjaxDomain = array(null,'127.0.0.1','www.moonlord.cn',$_SERVER["SERVER_NAME"]);//允许AJAX跨域请求的来源地址的域名（包含null表示允许没有Origin值的请求）
+$JsonpCallBack = null;//Jsonp回调的JS函数名（默认值为null，则不使用Jsonp方式返回数据，而是输出JSON格式的字符串）
 
-//输出结果（使用die输出JSON格式的字符串）
+//输出结果（使用die输出JSON格式的字符串或者Jsonp回调）
 function MyResult($code='', $data='', $tips='', $description ='')
 {
-	MyResultReport($code, $data, $tips, $description);
+	global $JsonpCallBack;
+	MyResultReport($code, $data, $tips, $description,$JsonpCallBack);
 	$content = ob_get_contents();
 	if (strlen($content)>0)
 	{
@@ -44,29 +46,18 @@ function MyResult($code='', $data='', $tips='', $description ='')
 	}
 	//$result = json_encode($result);
 	$result = MyJsonEncode($result);
-	die($result);
-}
-//输出结果（使用die输出JSONP回调结果）
-function MyJsonpResult($code='', $data='', $tips='', $description ='',$callback='')
-{
-	MyResultReport($code, $data, $tips, $description,$callback);
-	$content = ob_get_contents();
-	if (strlen($content)>0)
+	if ($JsonpCallBack===null)
 	{
-		ob_end_clean();
-		$result = array('code'=>(string)$code,'data'=>$data,'tips'=>(string)$tips,'description'=>(string)$description,'ignore_content'=>(string)$content);
+		die($result);
 	}
-	else
-	{
-		$result = array('code'=>(string)$code,'data'=>$data,'tips'=>(string)$tips,'description'=>(string)$description);
+	else{
+		$result = str_replace("\\","\\\\",$result);
+		$result = str_replace("'","\\'",$result);
+		die('<script type="text/javascript">'.$JsonpCallBack.'(\''.$result.'\');</script>');
+		//注意：需要Content-Security-Policy的script-src中的'unsafe-inline'属性存在，才允许执行内联脚本
+		//实测：无论是html代码中的script的src或者script代码动态引入js文件都会被检验来源
 	}
-	//$result = json_encode($result);
-	$result = MyJsonEncode($result);
-	$result = str_replace("\\","\\\\",$result);
-	$result = str_replace("'","\\'",$result);
-	die('<script type="text/javascript">'.$callback.'(\''.$result.'\');</script>');
-	//注意：需要Content-Security-Policy的script-src中的'unsafe-inline'属性存在，才允许执行内联脚本
-	//实测：无论是html代码中的script的src或者script代码动态引入js文件都会被检验来源
+	
 }
 //监测结果（完善此函数，可进行API的监控、统计、调优等）
 function MyResultReport($code='', $data='', $tips='', $description ='',$callback='')
@@ -189,10 +180,10 @@ MyAllowAjaxCheck($AllowAjaxDomain);
 function MySafeHtml($Source){
 	return htmlspecialchars($Source, ENT_QUOTES);
 	//&（和号）成为 &amp;
-    //"（双引号）成为 &quot;
+	//"（双引号）成为 &quot;
 	//'（单引号）成为 &#039;
-    //<（小于）成为 &lt;
-    //>（大于）成为 &gt;
+	//<（小于）成为 &lt;
+	//>（大于）成为 &gt;
 }
 
 //Base64（用于URL的改进）编码
@@ -336,7 +327,9 @@ function MySessionStart(){
 		//PHP 5.2.0	才加入session_set_cookie_params的第5个参数以及setcookie的第7个参数，httponly
 		//之前版本可以使用header("Set-Cookie: key=value; httponly");达到类似效果
 		session_set_cookie_params(0, null, null, null, true);
-		session_start();
+		if(session_start()===false){
+			MyResult('2051','','后端代码执行失败',__FILE__.'[行号'.__LINE__.']'.'session_start()执行失败，返回值为false');
+		}
 		//setcookie(session_name(),session_id(),time()+1800,null, null, null, true);
 	}
 }
@@ -345,7 +338,7 @@ function MySessionSet($key,$value){
 	MySessionStart();
 	if (is_string($key)===false || is_numeric($key) && (int)$key == (float)$key)
 	{
-		MyResult('2051','','后端PHP代码缺陷',__FILE__.'[行号'.__LINE__.']'.'$_SESSION是以关联数组保存的，所以$key值不能为数值类型或者整数字符串，参数$key的值为'.$key);
+		MyResult('2052','','后端PHP代码缺陷',__FILE__.'[行号'.__LINE__.']'.'$_SESSION是以关联数组保存的，所以$key值不能为数值类型或者整数字符串，参数$key的值为'.$key);
 	}
 	$_SESSION[$key]='';
 	$_SESSION[$MyClientIP.$key]=$value;
