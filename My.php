@@ -35,9 +35,10 @@ function MyResult($code='', $data='', $tips='', $description ='')
 	global $JsonpCallBack;
 	MyResultReport($code, $data, $tips, $description,$JsonpCallBack);
 	$content = ob_get_contents();
+	ob_end_clean();
+	ob_start();
 	if (strlen($content)>0)
 	{
-		ob_end_clean();
 		$result = array('code'=>(string)$code,'data'=>$data,'tips'=>(string)$tips,'description'=>(string)$description,'ignore_content'=>(string)$content);
 	}
 	else
@@ -86,7 +87,7 @@ function ErrorHandler($errno='' , $errstr='' , $errfile='' ,$errline='' , $errco
 	//可以处理：E_USER_ERROR、E_USER_WARNING、E_USER_NOTICE
 	//Notice: Undefined variable
 	//注意：
-	//在这个异常处理程序被调用后，脚本会停止执行	
+	//在这个异常处理程序被调用后，脚本会停止执行
 	MyResult('2049','','后端PHP发生错误',$errfile.'[行号'.$errline.']'.$errstr);
 }
 set_error_handler('ErrorHandler',E_ALL | E_STRICT);
