@@ -14,7 +14,7 @@
 //description：详细信息（用于测试和Debug使用，不建议展示给用户）
 //注意：
 //以1024，2048为错误码分界线
-//本文件内部已占用的错误码为1025-1039（前端参数错误）、1100-1102（安全性错误）、2049-2052（后端代码错误）
+//本文件内部已占用的错误码为1025-1040（前端参数错误）、1100-1102（安全性错误）、2049-2052（后端代码错误）
 
 //基本设置：
 error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);//运行模式（抑制警告和提示信息，只显示错误信息）
@@ -569,6 +569,17 @@ function MyCheckTime($ParameterName)
 	}
 	MyResult('1037', $data='', $tips='参数'.$ParameterName.'的值格式错误', $description ='参数'.$ParameterName.'的值应为0或1，请求传递的'.$ParameterName.'参数的值为'.$Parameter);
 }
+//数组
+function MyCheckArray($ParameterName)
+{
+	global ${$ParameterName};
+	$Parameter = ${$ParameterName};
+	if (isset($Parameter) && is_array($Parameter)){
+		${$ParameterName} = $Parameter;
+		return;
+	}
+	MyResult('1038', $data='', $tips='参数'.$ParameterName.'的值格式错误', $description ='参数'.$ParameterName.'的值应为数组，请求传递的'.$ParameterName.'参数的值为'.$Parameter);
+}
 //整数数组（限制大小）
 function MyCheckIntegerArray($ParameterName, $MinValue=1, $MaxValue=PHP_INT_MAX)
 {
@@ -576,7 +587,7 @@ function MyCheckIntegerArray($ParameterName, $MinValue=1, $MaxValue=PHP_INT_MAX)
 	$Parameter = ${$ParameterName};
 	if (!is_array($Parameter))
 	{
-		MyResult('1038', $data='', $tips='参数'.$ParameterName.'的值格式错误', $description ='参数'.$ParameterName.'的值应为不小于'.$MinValue.'，不大于'.$MaxValue.'的整数的数组，请求传递的'.$ParameterName.'参数的值不是数组，参数的值为'.$Parameter);
+		MyResult('1039', $data='', $tips='参数'.$ParameterName.'的值格式错误', $description ='参数'.$ParameterName.'的值应为不小于'.$MinValue.'，不大于'.$MaxValue.'的整数的数组，请求传递的'.$ParameterName.'参数的值不是数组，参数的值为'.$Parameter);
 	}
 	for ($i = 0; $i < count($Parameter); $i++)
 	{
@@ -586,7 +597,7 @@ function MyCheckIntegerArray($ParameterName, $MinValue=1, $MaxValue=PHP_INT_MAX)
 		}
 		else
 		{
-			MyResult('1039', $data='', $tips='参数'.$ParameterName.'的值格式错误', $description ='参数'.$ParameterName.'的值应为不小于'.$MinValue.'，不大于'.$MaxValue.'的整数的数组，请求传递的'.$ParameterName.'参数的数组元素的值不符合限制条件，参数的值为'.MyJsonEncode($Parameter));
+			MyResult('1040', $data='', $tips='参数'.$ParameterName.'的值格式错误', $description ='参数'.$ParameterName.'的值应为不小于'.$MinValue.'，不大于'.$MaxValue.'的整数的数组，请求传递的'.$ParameterName.'参数的数组元素的值不符合限制条件，参数的值为'.MyJsonEncode($Parameter));
 		}
 	}
 }
