@@ -575,7 +575,6 @@ function MyCheckArray($ParameterName)
 	global ${$ParameterName};
 	$Parameter = ${$ParameterName};
 	if (isset($Parameter) && is_array($Parameter)){
-		${$ParameterName} = $Parameter;
 		return;
 	}
 	MyResult('1038', $data='', $tips='参数'.$ParameterName.'的值格式错误', $description ='参数'.$ParameterName.'的值应为数组，请求传递的'.$ParameterName.'参数的值为'.$Parameter);
